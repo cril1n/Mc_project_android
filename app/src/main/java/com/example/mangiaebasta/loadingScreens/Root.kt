@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -37,7 +38,9 @@ val topLevelRoutes = listOf(
 @SuppressLint("RestrictedApi")
 @Composable
 fun Root(model: MainViewModel) {
-    val user = User("John", "Doe", "John Doe", "1234 5678 9012 3456", 12, 2025, "123")
+    val userhardCoded = User("John", "Doe", "John Doe", "1234567812345678", 12, 25, "123")
+    model.setUserData(userhardCoded)
+    val user = model.user.collectAsState()
     val navController = rememberNavController()
 
     Scaffold(
@@ -58,7 +61,7 @@ fun Root(model: MainViewModel) {
                         onClick = {
                             navController.navigate(topLevelRoute.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                                    saveState = false
                                 }
                                 launchSingleTop = true
                                 restoreState = true
@@ -70,9 +73,9 @@ fun Root(model: MainViewModel) {
         }
     ) { innerPadding ->
         NavHost(navController, startDestination = "home", Modifier.padding(innerPadding)) {
-            composable("home") { Home(model, user) }
-            composable("order track") { OrderTrack(user) }
-            composable("profile") { Profile(user) }
+            composable("home") { Home(model, user.value) }
+            composable("order track") { OrderTrack(user.value) }
+            composable("profile") { Profile(model, user.value) }
         }
     }
 
