@@ -6,6 +6,6 @@ import androidx.navigation.NavController
 import com.example.mangiaebasta.model.Menu
 
 @Composable
-fun MenuDetail(menu: Menu?, navController: NavController) {
+fun MenuDetail(menu: Menu?) {
     Text(text = menu?.name ?: "Nessun menu selezionato")
 }
