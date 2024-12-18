@@ -3,6 +3,7 @@ package com.example.mangiaebasta.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
+import android.graphics.Bitmap
 
 
 data class User(
@@ -96,7 +97,12 @@ data class Menu(
     val location: LocationData,
     val imageVersion: Int,
     val deliveryTime: Int,
-    val shortDescription: String
+    val shortDescription: String,
+)
+
+data class MenuWImage(
+    val menu: Menu,
+    val image: Bitmap
 )
 
 typealias NearMenuResponse = List<Menu>

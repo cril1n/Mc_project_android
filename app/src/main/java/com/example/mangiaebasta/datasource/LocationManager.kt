@@ -37,6 +37,7 @@ class LocationManager(private val context: Context) {
                 Priority.PRIORITY_HIGH_ACCURACY,
                 cancellationTokenSource.token
             ).await()
+            Log.d("LocationManager", "Location fetched: $location")
             location
         } catch (e: Exception) {
             Log.e("LocationManager", "Error fetching location: ${e.message}")

@@ -8,26 +8,25 @@ import com.example.mangiaebasta.AppDependencies
 import com.example.mangiaebasta.datasource.CommunicationManager
 import com.example.mangiaebasta.datasource.DatabaseManager
 import com.example.mangiaebasta.datasource.DatastoreManager
+import com.example.mangiaebasta.model.Menu
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 object ImageRepo {
 
     private var database: DatabaseManager = AppDependencies.databaseManager
-    private var dsManager: DatastoreManager = AppDependencies.dataStoreManager
 
     fun resetImagesDb() {
         database.resetImagesDb()
     }
 
-    suspend fun getImage(mid: Int = 1): String {
+    suspend fun getImage(menu: Menu): String {
         return withContext(Dispatchers.IO) {
-            val menuData = CommunicationManager.getMenuDetail(mid, 46.34, 9.19)
-            val imageData = database.getImageFromDatabase(mid)
-
-            if (imageData == null || imageData.version != menuData?.imageVersion) {
-                val imageCodeResponse = CommunicationManager.getMenuImage(mid)
-                database.saveImageInDatabase(mid, imageCodeResponse!!.base64, menuData!!.imageVersion)
+            Log.d("ImageRepo", "Getting image for menu: $menu")
+            val imageData = database.getImageFromDatabase(menu.mid)
+            if (imageData == null || imageData.version != menu.imageVersion) {
+                val imageCodeResponse = CommunicationManager.getMenuImage(menu.mid)
+                database.saveImageInDatabase(menu.mid, imageCodeResponse!!.base64, menu.imageVersion)
                 Log.d("ImageRepo", "New image saved in database")
                 imageCodeResponse.base64
             } else {

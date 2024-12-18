@@ -1,8 +1,11 @@
 package com.example.mangiaebasta.screens.home
 
+import android.location.Location
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,23 +14,46 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.example.mangiaebasta.model.MenuWImage
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @Composable
-fun HomeScreen(model: MainViewModel) {
+fun HomeScreen(model: MainViewModel, navController: NavHostController) {
 
-    HomeScreenHeader(model)
-    HomeScreenBody(model)
+    val menuList = model.menuList.collectAsState()
+    val location = model.location.collectAsState()
+
+    LaunchedEffect(location.value) {
+        Log.d("HomeScreen", "Location changed: ${location.value}")
+        if (location.value != null) {
+            model.loadMenuList()
+        }
+    }
+
+    if (menuList.value.isEmpty()) {
+        CircularProgressIndicator()
+    } else {
+        Column {
+            HomeScreenHeader(model)
+            HomeScreenBody(model, menuList.value, location.value, navController)
+        }
+    }
+
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +65,7 @@ fun HomeScreenHeader(model: MainViewModel) {
         title = { },
         modifier = Modifier.fillMaxWidth(),
         colors = TopAppBarDefaults.topAppBarColors(
-          containerColor = Color.White
+            containerColor = Color.White
         ),
         actions = {
             Row(
@@ -94,23 +120,22 @@ fun HomeScreenHeader(model: MainViewModel) {
 }
 
 @Composable
-fun HomeScreenBody(model: MainViewModel) {
+fun HomeScreenBody(
+    model: MainViewModel,
+    menuList: List<MenuWImage>,
+    location: Location?,
+    navController: NavController
+) {
     val selectedSection = model.selectedSection.collectAsState()
 
     when (selectedSection.value) {
-        1 -> MenuList()
-        2 -> MenuMap()
+        1 -> MenuList(menuList, navController)
+        2 -> MenuMap(menuList, location, navController)
     }
 }
 
-@Composable
-fun MenuList() {
-    Text(text = "Menu List")
-}
 
-@Composable
-fun MenuMap() {
-    Text(text = "Menu Map")
-}
+
+
 
 

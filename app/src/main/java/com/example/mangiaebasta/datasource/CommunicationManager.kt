@@ -31,8 +31,6 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 object CommunicationManager {
-    private val dataStoreManager = AppDependencies.dataStoreManager
-    private val databaseManager = AppDependencies.databaseManager
     private val BASE_URL = "https://develop.ewlab.di.unimi.it/mc/2425"
     var sid: String? = null
     var uid: Int? = null
@@ -99,7 +97,12 @@ object CommunicationManager {
         return result
     }
 
-    suspend fun createUser(): String {
+    fun setSidUid(s: String, u: Int) {
+        sid = s
+        uid = u
+    }
+
+    suspend fun createUser(): CreateUserResponse {
         Log.d(TAG, "createUser")
 
         val url = "$BASE_URL/user"
@@ -111,7 +114,7 @@ object CommunicationManager {
         uid = result.uid
         Log.d(TAG, "sid: $sid")
         Log.d(TAG, "uid: $uid")
-        return result.sid
+        return result
     }
 
     suspend fun getUser(): GetUserResponse? {
@@ -195,15 +198,15 @@ object CommunicationManager {
         return null
     }
 
-    suspend fun getNearMenu(): NearMenuResponse? {
+    suspend fun getNearMenu(lat: Double, lng: Double): NearMenuResponse? {
         Log.d(TAG, "getNearMenu")
 
         if (sid != null && uid != null) {
             val url = "$BASE_URL/menu"
             val queryParameters = mapOf(
                 "sid" to sid,
-                "lat" to "45.46",
-                "lng" to "9.19"
+                "lat" to lat.toString(),
+                "lng" to lng.toString()
             )
             val httpResponse = genericRequest(url, HttpMethod.GET, queryParameters)
             val result: NearMenuResponse = httpResponse.body()

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +31,27 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
         return withContext(Dispatchers.IO) {
             val preferences = dataStore.data.first()
             preferences[SID_KEY]
+        }
+    }
+
+    private val UID_KEY = intPreferencesKey("uid_key")
+
+    fun setUidInDataStore(uid: Int?) {
+        if (uid == null) return
+        CoroutineScope(Dispatchers.Main).launch {
+            dataStore.edit { preferences ->
+                preferences[UID_KEY] = uid
+                val savedUid = preferences[UID_KEY]
+                Log.d("StorageManager", "New saved uid: $savedUid")
+            }
+        }
+    }
+
+    suspend fun getUidFromDataStore(): Int? {
+        Log.d("StorageManager", "Getting sid from data store")
+        return withContext(Dispatchers.IO) {
+            val preferences = dataStore.data.first()
+            preferences[UID_KEY]
         }
     }
 

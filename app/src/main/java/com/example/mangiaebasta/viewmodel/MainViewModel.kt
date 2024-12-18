@@ -1,23 +1,31 @@
 package com.example.mangiaebasta.viewmodel
 
 import android.Manifest
+import android.graphics.BitmapFactory
 import android.location.Location
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import com.example.mangiaebasta.AppDependencies
 import com.example.mangiaebasta.datasource.CommunicationManager
+import com.example.mangiaebasta.model.Menu
+import com.example.mangiaebasta.model.MenuDetailed
+import com.example.mangiaebasta.model.MenuWImage
+import com.example.mangiaebasta.repositories.ImageRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 class MainViewModel : ViewModel() {
     private val dataStoreManager = AppDependencies.dataStoreManager
     private val databaseManager = AppDependencies.databaseManager
     private val locationManager = AppDependencies.locationManager
     private var sid: String? = null
+    private var uid: Int? = null
 
 
     // APP
@@ -39,13 +47,15 @@ class MainViewModel : ViewModel() {
         return try {
             Log.d("MainViewModel", "Checking first run")
             sid = dataStoreManager.getSidFromDataStore().toString()
+            uid = dataStoreManager.getUidFromDataStore()
             if (sid == null || sid == "null") {
                 Log.d("MainViewModel", "First run")
                 _firstRun.value = true
                 _initialized.value = true
                 true
             } else {
-                Log.d("MainViewModel", "Not first run sid: $sid")
+                Log.d("MainViewModel", "Not first run sid: $sid, uid: $uid")
+                CommunicationManager.setSidUid(sid!!, uid!!)
                 _firstRun.value = false
                 _initialized.value = true
                 false
@@ -59,8 +69,10 @@ class MainViewModel : ViewModel() {
     suspend fun createNewUser() {
         Log.d("MainViewModel", "Creating new user")
         try {
-            sid = CommunicationManager.createUser()
+            sid = CommunicationManager.createUser().sid
+            uid = CommunicationManager.createUser().uid
             dataStoreManager.setSidInDataStore(sid)
+            dataStoreManager.setUidInDataStore(uid)
             Log.d("MainViewModel", "New user create, sid: $sid")
             _firstRun.value = false
         } catch (e: Exception) {
@@ -96,6 +108,34 @@ class MainViewModel : ViewModel() {
             _selectedSection.value = 2
         } else {
             _selectedSection.value = 1
+        }
+    }
+
+    //HOMESCREEN
+
+    private val _menuList = MutableStateFlow<List<MenuWImage>>(emptyList())
+    val menuList: StateFlow<List<MenuWImage>> = _menuList
+
+    @OptIn(ExperimentalEncodingApi::class)
+    suspend fun loadMenuList() {
+        Log.d("MainViewModel", "Loading menu list")
+        try {
+            val rawList = CommunicationManager.getNearMenu(location.value!!.latitude, location.value!!.longitude)
+            Log.d("MainViewModel", "Menu list loaded")
+            val updatedList = rawList?.map { menu ->
+
+                val base64 = ImageRepo.getImage(menu)
+                val byteArray = Base64.decode(base64)
+                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                MenuWImage(
+                    menu = menu,
+                    image = bitmap
+                )
+            } ?: emptyList()
+
+            _menuList.value = updatedList
+        } catch (e: Exception) {
+            Log.e("MainViewModel", "Error in loadMenuList: $e")
         }
     }
 }
