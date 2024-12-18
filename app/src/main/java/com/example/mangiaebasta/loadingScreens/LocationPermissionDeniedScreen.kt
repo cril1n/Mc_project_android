@@ -1,22 +1,20 @@
-package com.example.mangiaebasta
+package com.example.mangiaebasta.loadingScreens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun SplashScreen() {
-    Column (Modifier.fillMaxSize(),
+fun LocationPermissionDeniedScreen() {
+    Column(
+        Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
-        Button(
-            onClick = {  },
-        ) { Text(text = "Start") }
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "Location permission denied")
     }
 }

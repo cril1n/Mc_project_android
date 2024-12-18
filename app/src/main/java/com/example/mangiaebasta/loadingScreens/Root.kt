@@ -1,4 +1,4 @@
-package com.example.mangiaebasta
+package com.example.mangiaebasta.loadingScreens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.padding
