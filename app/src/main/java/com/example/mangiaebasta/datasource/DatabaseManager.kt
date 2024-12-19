@@ -36,7 +36,6 @@ class DatabaseManager(context: Context) {
         try {
             return withContext(Dispatchers.IO) {
                 val image = dao.getImage(mid)
-                Log.d("StorageManager", image.toString())
                 image
             }
         } catch (e: Exception) {

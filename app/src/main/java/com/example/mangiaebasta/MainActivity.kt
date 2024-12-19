@@ -8,6 +8,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Text
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +23,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.mangiaebasta.loadingScreens.LocationPermissionDeniedScreen
 import com.example.mangiaebasta.loadingScreens.LocationPermissionScreen
@@ -85,7 +97,27 @@ fun MyApp(model: MainViewModel) {
                 }
             }
         } else {
-            CircularProgressIndicator()
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment =  Alignment.CenterHorizontally
+            ){
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "Descrizione immagine",
+                    modifier = Modifier.size(200.dp).padding(bottom = 16.dp)
+                )
+                Text(
+                    text = "Loading menus...",
+                    fontSize = 20.sp,
+                )
+                Column(
+                    modifier = Modifier.padding(30.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 

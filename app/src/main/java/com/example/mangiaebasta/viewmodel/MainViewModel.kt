@@ -6,8 +6,10 @@ import android.location.Location
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.mangiaebasta.AppDependencies
 import com.example.mangiaebasta.datasource.CommunicationManager
+import com.example.mangiaebasta.datasource.DatastoreManager
 import com.example.mangiaebasta.model.User
 import com.example.mangiaebasta.model.Menu
 import com.example.mangiaebasta.model.MenuDetailed
@@ -22,6 +24,9 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 class MainViewModel : ViewModel() {
+
+    private val TAG = MainViewModel::class.simpleName
+
     private val dataStoreManager = AppDependencies.dataStoreManager
     private val databaseManager = AppDependencies.databaseManager
     private val locationManager = AppDependencies.locationManager
@@ -66,39 +71,39 @@ class MainViewModel : ViewModel() {
 
     suspend fun checkFirstRun(): Boolean {
         return try {
-            Log.d("MainViewModel", "Checking first run")
+            Log.d(TAG, "Checking first run")
             sid = dataStoreManager.getSidFromDataStore().toString()
             uid = dataStoreManager.getUidFromDataStore()
             if (sid == null || sid == "null") {
-                Log.d("MainViewModel", "First run")
+                Log.d(TAG, "First run")
                 _firstRun.value = true
                 _initialized.value = true
                 true
             } else {
-                Log.d("MainViewModel", "Not first run sid: $sid, uid: $uid")
+                Log.d(TAG, "Not first run sid: $sid, uid: $uid")
                 CommunicationManager.setSidUid(sid!!, uid!!)
                 _firstRun.value = false
                 _initialized.value = true
                 false
             }
         } catch (e: Exception) {
-            Log.e("MainViewModel", "Error in checkFirstRun: $e")
+            Log.e(TAG, "Error in checkFirstRun: $e")
             false
         }
     }
 
     suspend fun createNewUser() {
-        Log.d("MainViewModel", "Creating new user")
+        Log.d(TAG, "Creating new user")
         try {
             sid = CommunicationManager.createUser().sid
             uid = CommunicationManager.createUser().uid
             dataStoreManager.setSidInDataStore(sid)
             dataStoreManager.setUidInDataStore(uid)
-            Log.d("MainViewModel", "New user create, sid: $sid")
+            Log.d(TAG, "New user create, sid: $sid, uid: $uid")
             _firstRun.value = false
             _user.value = User("", "", "", "", 0, 0, "")
         } catch (e: Exception) {
-            Log.e("MainViewModel", "Error in createNewUser: $e")
+            Log.e(TAG, "Error in createNewUser: $e")
         }
 
     }
@@ -134,6 +139,23 @@ class MainViewModel : ViewModel() {
     }
 
     //PROFILE
+    //RECUPERO USER DAL DATASTORE
+    init {
+        viewModelScope.launch {
+            dataStoreManager.getUser().collect{
+                Log.d(TAG, "User from datastore: $it")
+                _user.value = it
+            }
+        }
+    }
+
+
+    private val _startDestination = MutableStateFlow("firstRegistration")
+    val startDestination: StateFlow<String> = _startDestination
+
+    fun setStartDestination(value: String){
+        _startDestination.value = value
+    }
 
     // EDIT PROFILE
 
@@ -158,8 +180,10 @@ class MainViewModel : ViewModel() {
         _user.value.firstName = _firstNameForm.value
         _user.value.lastName = _lastNameForm.value
         Log.d("updateUserName", "User name data updated with new values: ${_user.value.firstName}, ${_user.value.lastName}")
+        setStartDestination("profile")
         CoroutineScope(Dispatchers.Main).launch {
             CommunicationManager.updateUser(_user.value)
+            dataStoreManager.saveUser(_user.value)
         }
     }
 
@@ -198,7 +222,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun updateUserCardData(){
-        Log.d("MainViewModel", "Updating user card data with values: ${_user.value}")
+        Log.d(TAG, "Updating user card data with values: ${_user.value}")
         if(validateCardField("cardFullName", _cardFullNameForm.value)) {
             _user.value.cardFullName = _cardFullNameForm.value
         }
@@ -215,9 +239,10 @@ class MainViewModel : ViewModel() {
         if(validateCardField("CVV", _cvvForm.value)) {
             _user.value.cardCVV = _cvvForm.value
         }
-        Log.d("MainViewModel", "User card data updated with new values: ${_user.value}")
+        Log.d(TAG, "User card data updated with new values: ${_user.value}")
         CoroutineScope(Dispatchers.Main).launch {
             CommunicationManager.updateUser(_user.value)
+            dataStoreManager.saveUser(_user.value)
         }
     }
 
@@ -261,16 +286,17 @@ class MainViewModel : ViewModel() {
             else -> return false
         }
     }
+
     //HOMESCREEN
 
     private val _menuList = MutableStateFlow<List<MenuWImage>>(emptyList())
     val menuList: StateFlow<List<MenuWImage>> = _menuList
     @OptIn(ExperimentalEncodingApi::class)
     suspend fun loadMenuList() {
-        Log.d("MainViewModel", "Loading menu list")
+        Log.d(TAG, "Loading menu list")
         try {
             val rawList = CommunicationManager.getNearMenu(location.value!!.latitude, location.value!!.longitude)
-            Log.d("MainViewModel", "Menu list loaded")
+            Log.d(TAG, "Menu list loaded")
             val updatedList = rawList?.map { menu ->
                 val base64 = ImageRepo.getImage(menu)
                 val byteArray = Base64.decode(base64)
@@ -282,7 +308,7 @@ class MainViewModel : ViewModel() {
             } ?: emptyList()
                 _menuList.value = updatedList
         } catch (e: Exception) {
-            Log.e("MainViewModel", "Error in loadMenuList: $e")
+            Log.e(TAG, "Error in loadMenuList: $e")
         }
     }
 }

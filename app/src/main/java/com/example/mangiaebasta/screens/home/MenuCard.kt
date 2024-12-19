@@ -42,7 +42,7 @@ fun MenuCard(menu: MenuWImage, navController: NavController) {
                         .width(300.dp)
                         .height(300.dp),
                     bitmap = menu.image.asImageBitmap(),
-                    contentDescription = "Foto del menu",
+                    contentDescription = "Menu Image"
                 )
             }
 
@@ -77,7 +77,7 @@ fun MenuCard(menu: MenuWImage, navController: NavController) {
                     )
 
                     Text(
-                        text = "Consegna: ${menu.menu.deliveryTime} min",
+                        text = "Delivery time: ${menu.menu.deliveryTime} min",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
