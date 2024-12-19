@@ -22,11 +22,15 @@ fun Home(model: MainViewModel, user: User) {
     NavHost(navController = navController, startDestination = "homeScreen") {
         composable("homeScreen") { HomeScreen(model, navController) }
         composable(
-            "menuDetail/{mid}",
-            arguments = listOf(navArgument("mid") { type = NavType.IntType })
+            "menuDetail/{mid}/{image}",
+            arguments = listOf(
+                navArgument("mid") { type = NavType.IntType },
+                navArgument("image") { type = NavType.StringType })
         ) { backStackEntry ->
             val mid = backStackEntry.arguments?.getInt("mid")
-            MenuDetail(mid!!, navController)
+            val image = backStackEntry.arguments?.getString("image")
+            MenuDetail(mid!!, image!!, navController, model)
+
         }
         composable("orderCheckOut") { OrderCheckOut() }
         composable("profileEdit") { EditProfile(model, user, navController) }

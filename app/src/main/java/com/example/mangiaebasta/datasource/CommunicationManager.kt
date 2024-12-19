@@ -2,7 +2,6 @@ package com.example.mangiaebasta.datasource
 
 import android.net.Uri
 import android.util.Log
-import com.example.mangiaebasta.AppDependencies
 import com.example.mangiaebasta.model.CreateUserResponse
 import com.example.mangiaebasta.model.GetUserResponse
 import com.example.mangiaebasta.model.ImageCodeResponse

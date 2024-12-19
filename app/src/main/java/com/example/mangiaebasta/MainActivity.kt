@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material3.CircularProgressIndicator
@@ -17,6 +18,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.mangiaebasta.datasource.DatabaseManager
+import com.example.mangiaebasta.datasource.DatastoreManager
+import com.example.mangiaebasta.datasource.LocationManager
 import com.example.mangiaebasta.loadingScreens.LocationPermissionDeniedScreen
 import com.example.mangiaebasta.loadingScreens.LocationPermissionScreen
 import com.example.mangiaebasta.loadingScreens.Root
@@ -34,7 +40,16 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        AppDependencies.init(this, dataStore)
+        enableEdgeToEdge()
+        val databaseManager = DatabaseManager(this)
+        val dataStoreManager = DatastoreManager(dataStore)
+        val locationManager = LocationManager(this)
+        val factory = viewModelFactory {
+            initializer {
+                MainViewModel(databaseManager, dataStoreManager, locationManager)
+            }
+        }
+        val mainViewModel: MainViewModel by viewModels() { factory }
         setContent {
             MyApp(mainViewModel)
         }

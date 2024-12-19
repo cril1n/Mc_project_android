@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import android.graphics.Bitmap
+import kotlinx.coroutines.flow.MutableStateFlow
 
 
 data class User(
@@ -114,14 +115,14 @@ data class ImageCodeResponse(
 
 @Serializable
 data class MenuDetailed(
-    val mid: Int,
-    val name: String,
-    val price: Double,
-    val location: LocationData,
-    val imageVersion: Int,
-    val deliveryTime: Int,
-    val shortDescription: String,
-    val longDescription: String,
+    val mid: Int?,
+    val name: String?,
+    val price: Double?,
+    val location: LocationData?,
+    val imageVersion: Int?,
+    val deliveryTime: Int?,
+    val shortDescription: String?,
+    val longDescription: String?,
 )
 
 @Entity

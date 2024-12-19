@@ -115,11 +115,14 @@ dependencies {
     implementation("com.mapbox.maps:android:11.8.1")
     implementation("com.mapbox.extension:maps-compose:11.8.1")
 
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 
     implementation("androidx.navigation:navigation-compose:2.8.4")
     implementation("androidx.compose.material:material:1.7.5")
     implementation ("androidx.compose.material3:material3:1.3.1")
+
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
 
 }

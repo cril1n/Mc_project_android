@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import com.example.mangiaebasta.AppDependencies
 import com.example.mangiaebasta.datasource.CommunicationManager
 import com.example.mangiaebasta.datasource.DatabaseManager
 import com.example.mangiaebasta.datasource.DatastoreManager
@@ -12,9 +11,8 @@ import com.example.mangiaebasta.model.Menu
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-object ImageRepo {
+class ImageRepo(private val database: DatabaseManager) {
 
-    private var database: DatabaseManager = AppDependencies.databaseManager
 
     fun resetImagesDb() {
         database.resetImagesDb()

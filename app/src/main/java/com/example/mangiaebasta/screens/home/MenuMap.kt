@@ -1,6 +1,8 @@
 package com.example.mangiaebasta.screens.home
 
+import android.graphics.Bitmap
 import android.location.Location
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -13,17 +15,23 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mangiaebasta.R
 import com.example.mangiaebasta.model.MenuWImage
+import com.example.mangiaebasta.viewmodel.MainViewModel
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotation
+import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotationState
 import com.mapbox.maps.extension.compose.annotation.rememberIconImage
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
 
 @Composable
-fun MenuMap(menuList: List<MenuWImage>, location: Location?, navController: NavController) {
+fun MenuMap(
+    menuList: List<MenuWImage>,
+    location: Location?,
+    navController: NavController,
+) {
 
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
@@ -47,7 +55,7 @@ fun MenuMap(menuList: List<MenuWImage>, location: Location?, navController: NavC
                 if (location != null) {
                     center(Point.fromLngLat(location.longitude, location.latitude))
                 }
-                zoom(14.5)  // Zoom a livello strada
+                zoom(14.0)  // Zoom a livello strada
                 pitch(0.0)  // Vista dall'alto perpendicolare
             }
         }
@@ -67,6 +75,7 @@ fun MenuMap(menuList: List<MenuWImage>, location: Location?, navController: NavC
 
         }
 
+
         // Aggiungi l'icona personalizzata nella posizione corrente
         val userMarker = rememberIconImage(
             key = R.drawable.homeicon,
@@ -81,22 +90,41 @@ fun MenuMap(menuList: List<MenuWImage>, location: Location?, navController: NavC
                 iconOpacity = 3.0
             }
         }
+        // Funzione di estensione per ridimensionare un Bitmap
+        fun Bitmap.resize(newWidth: Int, newHeight: Int): Bitmap {
+            return Bitmap.createScaledBitmap(this, newWidth, newHeight, true)
+        }
 
         menuList.forEach { menu ->
+
+            val roundedBitmap = RoundedMarkerWithBorder(
+                bitmap = menu.image.resize(120, 120),
+            )
+
             val menuMarker = rememberIconImage(
                 key = menu.image,
-                painter = BitmapPainter(menu.image.asImageBitmap())
+                painter = BitmapPainter(roundedBitmap.asImageBitmap())
             )
 
             PointAnnotation(
-                point = Point.fromLngLat(menu.menu.location.lng, menu.menu.location.lat)
-            ) {
-                iconImage = menuMarker
-                iconSize = 1.0
-                iconOpacity = 3.0
-            }
+                point = Point.fromLngLat(menu.menu.location.lng, menu.menu.location.lat),
+                init = fun PointAnnotationState.() {
+                    iconImage = menuMarker
+                    textField = menu.menu.name
+                    textOffset = listOf(0.0, 1.9)
+                    iconSize = 1.0
+                    iconOpacity = 3.0
+                },
+                onClick = {
+                    // Azione al clic, ad esempio mostrare un Toast o navigare
+                    Log.d("MenuMap", "Cliccato su ${menu.menu.name}")
 
+                    // Navigazione (se necessario)
+                    navController.navigate("menuDetail/${menu.menu.mid}/${menu.image}")
 
+                    true // Return true per indicare che il clic è stato gestito
+                }
+            )
         }
     }
 }
