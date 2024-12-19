@@ -29,7 +29,7 @@ fun Home(model: MainViewModel, user: User) {
             MenuDetail(mid!!, navController)
         }
         composable("orderCheckOut") { OrderCheckOut() }
-        composable("profileEdit") { EditProfile(user, navController) }
-        composable("billingEdit") { EditBilling(user, navController) }
+        composable("profileEdit") { EditProfile(model, user, navController) }
+        composable("billingEdit") { EditBilling(model, user, navController) }
     }
 }

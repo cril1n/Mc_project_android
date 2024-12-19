@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,30 +31,32 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mangiaebasta.R
 import com.example.mangiaebasta.model.User
+import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @Composable
-fun Profile(user: User) {
+fun Profile(model : MainViewModel, user: User) {
     // Creiamo un NavController che sarà responsabile della navigazione di Profile
     val navController = rememberNavController()
     // Definiamo il NavHost, che contiene tutte le destinazioni
     NavHost(navController = navController, startDestination = "profile") {
         composable("profile") { ProfileScreen(user, navController) }
-        composable("profileEdit") { EditProfile(user, navController) }
-        composable("billingEdit") { EditBilling(user, navController) }
+        composable("profileEdit") { EditProfile(model, user, navController) }
+        composable("billingEdit") { EditBilling(model, user, navController) }
         composable("lastOrder") { LastOrderScreen(user, navController) }
     }
 }
 
 @Composable
-fun ProfileScreen(user: User, navController: NavController) {
+fun ProfileScreen( user: User, navController: NavController) {
     ProfileHeader()
+
     Column(
         Modifier
             .fillMaxWidth()
             .padding(vertical = 100.dp, horizontal = 40.dp),
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
-        ImageWithText()
+        ImageWithText(user)
         Column(
             Modifier
                 .fillMaxSize()
@@ -93,7 +96,7 @@ fun ProfileHeader() {
 }
 
 @Composable
-fun ProfileInfo(user: User, navController: NavController) {
+fun ProfileInfo( user: User, navController: NavController) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -131,7 +134,7 @@ fun LastOrderInfo(user: User, navController: NavController) {
 }
 
 @Composable
-fun ImageWithText() {
+fun ImageWithText(user: User) {
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -142,7 +145,7 @@ fun ImageWithText() {
             modifier = Modifier.size(200.dp)
         )
         Text(
-            text = "John Doe",
+            text = "${user.firstName} ${user.lastName}",
             fontSize = 20.sp
         )
     }

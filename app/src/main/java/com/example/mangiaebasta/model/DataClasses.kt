@@ -7,13 +7,13 @@ import android.graphics.Bitmap
 
 
 data class User(
-    val firstName: String,
-    val lastName: String,
-    val cardFullName: String,
-    val cardNumber: String,
-    val cardExpireMonth: Int,
-    val cardExpireYear: Int,
-    val cardCVV: String
+    var firstName: String,
+    var lastName: String,
+    var cardFullName: String,
+    var cardNumber: String,
+    var cardExpireMonth: Int,
+    var cardExpireYear: Int,
+    var cardCVV: String
 )
 
 @Serializable
