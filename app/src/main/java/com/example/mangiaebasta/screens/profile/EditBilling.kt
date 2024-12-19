@@ -72,7 +72,10 @@ fun EditBilling(model: MainViewModel, user: User, navController: NavController) 
                         onValueChange = { newValue ->
                             if (newValue.matches(Regex("^\\d{0,16}$"))) {
                                 cardNumberForm = newValue
-                                if (newValue.length == 16) isCardNumberValid = true
+                                if (newValue.length == 16) {
+                                    model.setCardNumberForm(newValue)
+                                    isCardNumberValid = true
+                                }
                                 else isCardNumberValid = false
                             }
                         },

@@ -68,7 +68,8 @@ class MainViewModel(
         _user.value = user
     }
 
-    fun setUserDataField(field: String, value: String) {
+
+    fun setUserDataField(field: String, value: String){
         when (field) {
             "firstName" -> _user.value.firstName = value
             "lastName" -> _user.value.lastName = value
@@ -112,6 +113,7 @@ class MainViewModel(
             dataStoreManager.setUidInDataStore(uid)
             Log.d("MainViewModel", "New user create, sid: $sid")
             _firstRun.value = false
+            _user.value = User("", "", "", "", 0, 0, "")
         } catch (e: Exception) {
             Log.e("MainViewModel", "Error in createNewUser: $e")
         }
@@ -206,15 +208,18 @@ class MainViewModel(
         _isEditProfile.value = !_isEditProfile.value
     }
 
-    fun updateUserNameData() {
+    fun updateUserNameData(){
+        Log.d("updateUserName", "Updating user name data with values: ${_firstNameForm.value}, ${_lastNameForm.value}")
         _user.value.firstName = _firstNameForm.value
         _user.value.lastName = _lastNameForm.value
-        /* AGGIORNARE UTENTE SUL SERVER */
+        Log.d("updateUserName", "User name data updated with new values: ${_user.value.firstName}, ${_user.value.lastName}")
+        CoroutineScope(Dispatchers.Main).launch {
+            CommunicationManager.updateUser(_user.value)
+        }
     }
 
     // EDIT BILLING
 
-    //cardNumber, expireMonth, expireYear, CVV, CardFullName
     private val _isEditBilling = MutableStateFlow(false)
     val isEditBilling: StateFlow<Boolean> = _isEditBilling
     private val _cardNumberForm = MutableStateFlow(_user.value.cardNumber)
@@ -271,6 +276,9 @@ class MainViewModel(
             _user.value.cardCVV = _cvvForm.value
         }
         Log.d("MainViewModel", "User card data updated with new values: ${_user.value}")
+        CoroutineScope(Dispatchers.Main).launch {
+            CommunicationManager.updateUser(_user.value)
+        }
     }
 
 

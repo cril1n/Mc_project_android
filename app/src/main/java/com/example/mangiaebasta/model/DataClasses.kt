@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import android.graphics.Bitmap
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.serialization.SerialName
 
 
 data class User(

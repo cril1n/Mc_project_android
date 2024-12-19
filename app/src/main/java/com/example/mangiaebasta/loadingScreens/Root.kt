@@ -1,9 +1,15 @@
 package com.example.mangiaebasta.loadingScreens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -11,11 +17,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,12 +48,9 @@ val topLevelRoutes = listOf(
     TopLevelRoute("OrderTrack", "order track", Icons.Default.ShoppingCart),
     TopLevelRoute("Profile", "profile", Icons.Default.Person)
 )
-
 @SuppressLint("RestrictedApi")
 @Composable
 fun Root(model: MainViewModel) {
-    val userhardCoded = User("John", "Doe", "John Doe", "1234567812345678", 12, 25, "123")
-    model.setUserData(userhardCoded)
     val user = model.user.collectAsState()
     val navController = rememberNavController()
 
@@ -78,6 +89,6 @@ fun Root(model: MainViewModel) {
             composable("profile") { Profile(model, user.value) }
         }
     }
-
 }
+
 
