@@ -14,6 +14,7 @@ import com.example.mangiaebasta.model.OrderResponseCompleted
 import com.example.mangiaebasta.model.OrderResponseOnDelivery
 import com.example.mangiaebasta.model.SendOrderRequest
 import com.example.mangiaebasta.model.UpdateUserRequest
+import com.example.mangiaebasta.model.User
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -25,10 +26,13 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+
 
 object CommunicationManager {
     private val BASE_URL = "https://develop.ewlab.di.unimi.it/mc/2425"
@@ -50,7 +54,6 @@ object CommunicationManager {
         DELETE,
         PUT
     }
-
 
     suspend fun genericRequest(
         url: String,
@@ -97,6 +100,7 @@ object CommunicationManager {
         return result
     }
 
+
     fun setSidUid(s: String, u: Int) {
         sid = s
         uid = u
@@ -110,8 +114,7 @@ object CommunicationManager {
         val httpResponse = genericRequest(url, HttpMethod.POST)
         val result: CreateUserResponse = httpResponse.body()
         Log.d(TAG, "Deserialized response: $result")
-        sid = result.sid
-        uid = result.uid
+        setSidUid(result.sid, result.uid)
         Log.d(TAG, "sid: $sid")
         Log.d(TAG, "uid: $uid")
         return result
@@ -132,7 +135,7 @@ object CommunicationManager {
         return null
     }
 
-    suspend fun updateUser(): String {
+    suspend fun updateUser(user: User): String {
         Log.d(TAG, "updateUser")
         if (sid != null && uid != null) {
             val url = "$BASE_URL/user/$uid"
@@ -156,6 +159,8 @@ object CommunicationManager {
         return "Something went wrong"
     }
 
+
+
     suspend fun sendOrder(): OrderResponse? {
         Log.d(TAG, "sendOrder")
 
@@ -169,7 +174,7 @@ object CommunicationManager {
                 sid = sid!!,
                 deliveryLocation = deliveryLocation
             )
-            val httpResponse = genericRequest(url, HttpMethod.POST, requestBody = requestBody)
+            val httpResponse = genericRequest(url, HttpMethod.POST, requestBody = Json.encodeToString(requestBody))
             val result: OrderResponse = httpResponse.body()
             Log.d(TAG, "Deserialized response: $result")
             return result

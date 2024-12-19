@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import android.graphics.Bitmap
+import kotlinx.serialization.SerialName
 
 
 data class User(

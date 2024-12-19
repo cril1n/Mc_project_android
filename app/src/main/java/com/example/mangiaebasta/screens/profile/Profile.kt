@@ -11,18 +11,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -38,11 +45,16 @@ fun Profile(model : MainViewModel, user: User) {
     // Creiamo un NavController che sarà responsabile della navigazione di Profile
     val navController = rememberNavController()
     // Definiamo il NavHost, che contiene tutte le destinazioni
-    NavHost(navController = navController, startDestination = "profile") {
-        composable("profile") { ProfileScreen(user, navController) }
-        composable("profileEdit") { EditProfile(model, user, navController) }
-        composable("billingEdit") { EditBilling(model, user, navController) }
-        composable("lastOrder") { LastOrderScreen(user, navController) }
+    // Mostra "PrimaRegistrazione" se il nome o il cognome è vuoto
+    if (user.firstName.isNullOrEmpty() || user.lastName.isNullOrEmpty()) {
+        PrimaRegistrazione(model)
+    } else {
+        NavHost(navController = navController, startDestination = "profile") {
+            composable("profile") { ProfileScreen(user, navController) }
+            composable("profileEdit") { EditProfile(model, user, navController) }
+            composable("billingEdit") { EditBilling(model, user, navController) }
+            composable("lastOrder") { LastOrderScreen(user, navController) }
+        }
     }
 }
 
@@ -148,5 +160,71 @@ fun ImageWithText(user: User) {
             text = "${user.firstName} ${user.lastName}",
             fontSize = 20.sp
         )
+    }
+}
+@Composable
+fun PrimaRegistrazione(model: MainViewModel) {
+    var firstNameForm by remember { mutableStateOf("") }
+    var lastNameForm by remember { mutableStateOf("") }
+    val isSubmitEnabled = firstNameForm.isNotBlank() && lastNameForm.isNotBlank()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            androidx.compose.material.Text(
+                text = "First Registration",
+                textAlign = TextAlign.Center
+            )
+            androidx.compose.material.Text(
+                text = "Fill in the following fields to get started",
+                textAlign = TextAlign.Center
+            )
+
+            TextField(
+                value = firstNameForm,
+                onValueChange = { newValue ->
+                    if (newValue.matches(Regex("^[a-zA-Z]*$"))) {
+                        firstNameForm = newValue
+                    }
+                },
+                label = { androidx.compose.material.Text("First name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            TextField(
+                value = lastNameForm,
+                onValueChange = { newValue ->
+                    if (newValue.matches(Regex("^[a-zA-Z]*$"))) {
+                        lastNameForm = newValue
+                    }
+                },
+                label = { androidx.compose.material.Text("Last name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            androidx.compose.material.Button(
+                onClick = {
+                    model.setFirstNameForm(firstNameForm)
+                    model.setLastNameForm(lastNameForm)
+                    model.updateUserNameData()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = isSubmitEnabled, // Abilita solo se entrambi i campi sono pieni
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFFA500))
+            ) {
+                androidx.compose.material.Text(text = "Submit", color = Color.White)
+            }
+        }
     }
 }
