@@ -114,8 +114,8 @@ object CommunicationManager {
         val result: CreateUserResponse = httpResponse.body()
         Log.d(TAG, "Deserialized response: $result")
         setSidUid(result.sid, result.uid)
-        Log.d(TAG, "sid: $sid")
-        Log.d(TAG, "uid: $uid")
+        //Log.d(TAG, "sid: $sid")
+        //Log.d(TAG, "uid: $uid")
         return result
     }
 
@@ -133,21 +133,24 @@ object CommunicationManager {
         Log.d(TAG, "sid or uid are null, create a user before")
         return null
     }
-
+    //Request body: UpdateUserRequest(firstName=John, lastName=Doe, cardFullName=John Doe, cardNumber=1234567890123456, cardExpireMonth=2, cardExpireYear=25, cardCVV=123, sid=XMLMFCAp6vBzf9I7jpOmIyskd4R0YLjnLhY0kQku1chKQT9bAHPZNUG6YM7yaeK8)
+    //Request body: UpdateUserRequest(firstName=Marcello, lastName=Ascamo, cardFullName=, cardNumber=, cardExpireMonth=0, cardExpireYear=0, cardCVV=, sid=MlLAfQLL30ArImPGdCPJAzVIv1cyAN9smkJP5geMTcbGNawS20lWhUuOTOkB4D6z)
+    //Request body: UpdateUserRequest(firstName=Marcello, lastName=Ascani, cardFullName=null, cardNumber=null, cardExpireMonth=0, cardExpireYear=0, cardCVV=null, sid=Aw3yIqqR5zwkN7sGE9VhbyUNbfoidMa2P3uhj4ri6YJRQIAAJ9xqvjEnEWS3dPM2)
     suspend fun updateUser(user: User): String {
         Log.d(TAG, "updateUser")
         if (sid != null && uid != null) {
             val url = "$BASE_URL/user/$uid"
             val requestBody = UpdateUserRequest(
-                firstName = "John",
-                lastName = "Doe",
-                cardFullName = "John Doe",
-                cardNumber = "1234567890123456",
-                cardExpireMonth = 2,
-                cardExpireYear = 25,
-                cardCVV = "123",
+                firstName = user.firstName,
+                lastName = user.lastName,
+                cardFullName = if(user.cardFullName == "") null else user.cardFullName,
+                cardNumber = if(user.cardNumber == "") null else user.cardNumber,
+                cardExpireMonth = if(user.cardExpireMonth == 0) null else user.cardExpireMonth,
+                cardExpireYear = if(user.cardExpireYear == 0) null else user.cardExpireYear,
+                cardCVV = if(user.cardCVV == "") null else user.cardCVV,
                 sid = sid
             )
+            Log.d(TAG, "Request body: $requestBody")
             val httpResponse = genericRequest(url, HttpMethod.PUT, requestBody = requestBody)
             if (httpResponse.status.value in 200..299) {
                 Log.d(TAG, "User updated")

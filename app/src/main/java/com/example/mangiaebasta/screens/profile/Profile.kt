@@ -1,5 +1,6 @@
 package com.example.mangiaebasta.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -20,6 +22,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -44,45 +49,77 @@ import com.example.mangiaebasta.viewmodel.MainViewModel
 fun Profile(model : MainViewModel, user: User) {
     // Creiamo un NavController che sarà responsabile della navigazione di Profile
     val navController = rememberNavController()
-    // Definiamo il NavHost, che contiene tutte le destinazioni
+    var startDestination = model.startDestination.collectAsState()
+    val user = model.user.collectAsState().value
+
+    Log.d("Profile", "User: $user")
+    if(!user.firstName.isEmpty() || !user.lastName.isEmpty()){
+        Log.d("Profile", "User name is not empty")
+        model.setStartDestination("profile")
+    }else{
+        Log.d("Profile", "User name is empty")
+        model.setStartDestination("firstRegistration")
+    }
     // Mostra "PrimaRegistrazione" se il nome o il cognome è vuoto
-    if (user.firstName.isNullOrEmpty() || user.lastName.isNullOrEmpty()) {
-        PrimaRegistrazione(model)
-    } else {
-        NavHost(navController = navController, startDestination = "profile") {
-            composable("profile") { ProfileScreen(user, navController) }
-            composable("profileEdit") { EditProfile(model, user, navController) }
-            composable("billingEdit") { EditBilling(model, user, navController) }
-            composable("lastOrder") { LastOrderScreen(user, navController) }
-        }
+    NavHost(navController = navController, startDestination = startDestination.value) {
+        // Definiamo il NavHost, che contiene tutte le destinazioni
+        composable("firstRegistration") { PrimaRegistrazione(model, navController)}
+        composable("profile") { ProfileScreen(user, navController) }
+        composable("profileEdit") { EditProfile(model, user, navController) }
+        composable("billingEdit") { EditBilling(model, user, navController) }
+        composable("lastOrder") { LastOrderScreen(user, navController) }
     }
 }
 
 @Composable
-fun ProfileScreen( user: User, navController: NavController) {
+fun ProfileScreen(user: User, navController: NavController) {
     ProfileHeader()
 
     Column(
         Modifier
-            .fillMaxWidth()
-            .padding(vertical = 100.dp, horizontal = 40.dp),
-        verticalArrangement = Arrangement.SpaceEvenly
+            .fillMaxSize()
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.SpaceBetween, // Distribuisce meglio gli elementi
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImageWithText(user)
         Column(
             Modifier
-                .fillMaxSize()
-                .padding(vertical = 40.dp, horizontal = 40.dp)
-                .clip(
-                    RoundedCornerShape(16.dp)
-                )
-                .background(Color.LightGray),
-            verticalArrangement = Arrangement.SpaceEvenly,
+                .fillMaxWidth()
+                .padding(vertical = 100.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ProfileInfo(user, navController)
-            ProfileBillingInfo(user, navController)
-            LastOrderInfo(user, navController)
+            ImageWithText(user)
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.LightGray)
+                    .padding(16.dp), // Interno per migliorare lo spacing
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ProfileInfo(user, navController)
+                ProfileBillingInfo(user, navController)
+                LastOrderInfo(user, navController)
+            }
+        }
+
+        // LOGOUT BUTTON
+        Button(
+            onClick = {
+                //TODO
+            },
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF6200EE), // Colore primario in linea con il tema
+                contentColor = Color.White
+            ),
+            shape = RoundedCornerShape(50), // Forma rotonda
+            modifier = Modifier
+                .padding(vertical = 20.dp)
+                .size(width = 200.dp, height = 50.dp) // Dimensioni del pulsante
+        ) {
+            Text(text = "Logout", fontSize = 16.sp)
         }
     }
 }
@@ -163,7 +200,7 @@ fun ImageWithText(user: User) {
     }
 }
 @Composable
-fun PrimaRegistrazione(model: MainViewModel) {
+fun PrimaRegistrazione(model: MainViewModel, navController: NavHostController) {
     var firstNameForm by remember { mutableStateOf("") }
     var lastNameForm by remember { mutableStateOf("") }
     val isSubmitEnabled = firstNameForm.isNotBlank() && lastNameForm.isNotBlank()
@@ -218,6 +255,7 @@ fun PrimaRegistrazione(model: MainViewModel) {
                     model.setFirstNameForm(firstNameForm)
                     model.setLastNameForm(lastNameForm)
                     model.updateUserNameData()
+                    navController.navigate("profile")
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = isSubmitEnabled, // Abilita solo se entrambi i campi sono pieni
@@ -227,4 +265,5 @@ fun PrimaRegistrazione(model: MainViewModel) {
             }
         }
     }
+
 }

@@ -6,9 +6,12 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.example.mangiaebasta.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -83,4 +86,43 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
             Log.d("StorageManager", "Data store cleared")
         }
     }
+
+    //USER
+    object PreferencesKeys {
+        val FIRST_NAME = stringPreferencesKey("first_name")
+        val LAST_NAME = stringPreferencesKey("last_name")
+        val CARD_FULL_NAME = stringPreferencesKey("card_full_name")
+        val CARD_NUMBER = stringPreferencesKey("card_number")
+        val CARD_EXPIRE_MONTH = stringPreferencesKey("card_expire_month")
+        val CARD_EXPIRE_YEAR = stringPreferencesKey("card_expire_year")
+        val CARD_CVV = stringPreferencesKey("card_cvv")
+    }
+
+    suspend fun saveUser( user: User) {
+        Log.d("StorageManager", "Saving user: $user")
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.FIRST_NAME] = user.firstName
+            preferences[PreferencesKeys.LAST_NAME] = user.lastName
+            preferences[PreferencesKeys.CARD_FULL_NAME] = user.cardFullName
+            preferences[PreferencesKeys.CARD_NUMBER] = user.cardNumber
+            preferences[PreferencesKeys.CARD_EXPIRE_MONTH] = user.cardExpireMonth.toString()
+            preferences[PreferencesKeys.CARD_EXPIRE_YEAR] = user.cardExpireYear.toString()
+            preferences[PreferencesKeys.CARD_CVV] = user.cardCVV
+        }
+    }
+
+    fun getUser(): Flow<User> {
+        return dataStore.data.map { preferences ->
+            User(
+                firstName = preferences[PreferencesKeys.FIRST_NAME] ?: "",
+                lastName = preferences[PreferencesKeys.LAST_NAME] ?: "",
+                cardFullName = preferences[PreferencesKeys.CARD_FULL_NAME] ?: "",
+                cardNumber = preferences[PreferencesKeys.CARD_NUMBER] ?: "",
+                cardExpireMonth = preferences[PreferencesKeys.CARD_EXPIRE_MONTH]?.toInt() ?: 0,
+                cardExpireYear = preferences[PreferencesKeys.CARD_EXPIRE_YEAR]?.toInt() ?: 0,
+                cardCVV = preferences[PreferencesKeys.CARD_CVV] ?: ""
+            )
+        }
+    }
+
 }
