@@ -2,7 +2,6 @@ package com.example.mangiaebasta.screens.home
 
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,10 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,6 +31,9 @@ import com.example.mangiaebasta.R
 import com.example.mangiaebasta.components.TopBarWithBackArrow
 import com.example.mangiaebasta.model.MenuDetailed
 import com.example.mangiaebasta.viewmodel.MainViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 @Composable
@@ -37,12 +41,15 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
 
     var menu by remember { mutableStateOf<MenuDetailed?>(null) }
     val address by model.address.collectAsState()
+    val userStatus by model.userStatus.collectAsState()
 
     LaunchedEffect(Unit) {
         menu = Json.decodeFromString<MenuDetailed>(menuString)
         model.loadAdress()
         Log.d("OrderCheckOut", "$address")
     }
+
+    userStatus?.let { UserStatusDialog(it) }
 
     Column {
         TopBarWithBackArrow("Order check out", navController)
@@ -87,7 +94,9 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
             }
             Button(
                 onClick = {
-                    // Handle order confirmation
+                    CoroutineScope(Dispatchers.Main).launch {
+                        model.sendOrder()
+                    }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
@@ -99,3 +108,65 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
 
 
 }
+
+
+@Composable
+fun UserStatusDialog(userStatus: String) {
+    // Stato per mostrare o nascondere il dialogo
+    var showDialog by remember { mutableStateOf(userStatus.isNotEmpty()) }
+
+    // Contenuti dinamici del dialogo in base a `userStatus`
+    val dialogData = when (userStatus) {
+        "missingInfo" -> Pair(
+            "Missing personal info",
+            "You need to complete your personal info before ordering"
+        )
+        "missingBilling" -> Pair(
+            "Missing billing info",
+            "You need to complete your billing info before ordering"
+        )
+        "onDelivery" -> Pair(
+            "Order already on delivery",
+            "You already have an order on delivery, you can check the status in the order section"
+        )
+        else -> null
+    }
+
+    // Mostra il dialogo solo se `dialogData` non è null e `showDialog` è true
+    dialogData?.let { (title, message) ->
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDialog = false
+                },
+                title = {
+                    Text(text = title)
+                },
+                text = {
+                    Text(text = message)
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showDialog = false
+                            // Aggiungi azioni di conferma qui
+                        }
+                    ) {
+                        Text("Confirm")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDialog = false
+                        }
+                    ) {
+                        Text("Close")
+                    }
+                }
+            )
+        }
+    }
+}
+
+

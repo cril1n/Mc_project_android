@@ -100,7 +100,7 @@ class MainViewModel(
 
     fun loadAdress() {
 
-        var addresses = location.value?.let {
+        val addresses = location.value?.let {
             geocoder.getFromLocation(
                 it.latitude,
                 it.longitude,
@@ -109,14 +109,10 @@ class MainViewModel(
         }
         if (addresses != null) {
             _address.value = addresses[0]
-//            val city: String = addresses[0].locality
-//            val state: String = addresses[0].adminArea
-//            val country: String = addresses[0].countryName
-//            val postalCode: String = addresses[0].postalCode
-//            val knownName: String = addresses[0].featureName
             Log.d("MainViewModel", "Address: $address")
         }
     }
+
     //HOMESCREEN
 
     private val _selectedSection = MutableStateFlow(1)
@@ -190,9 +186,6 @@ class MainViewModel(
     }
 
 
-    //ORDERCHECKOUT
-
-
     //USER
 
     private val _user = MutableStateFlow<User>(User("", "", "", "", 0, 0, ""))
@@ -238,6 +231,34 @@ class MainViewModel(
             Log.e(TAG, "Error in createNewUser: $e")
         }
 
+    }
+
+    //ORDER
+
+    private val _onDelivery = MutableStateFlow(false)
+    val onDelivery: StateFlow<Boolean> = _onDelivery
+
+
+    //ORDERCHECKOUT
+
+    private val _userStatus = MutableStateFlow(null as String?)
+    val userStatus: MutableStateFlow<String?> = _userStatus
+
+    fun sendOrder() {
+        if (_user.value.firstName == "" || user.value.lastName == "") {
+            _userStatus.value = "missingInfo"
+            return
+        }
+        if (user.value.cardNumber == "" || _user.value.cardExpireMonth == 0 || user.value.cardExpireYear == 0
+            || _user.value.cardCVV == "" || _user.value.cardFullName == ""
+        ) {
+            _userStatus.value = "missingBilling"
+            return
+        }
+        if (onDelivery.value) {
+            _userStatus.value = "onDelivery"
+            return
+        }
     }
 
 
