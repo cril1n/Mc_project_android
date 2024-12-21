@@ -12,7 +12,7 @@ import com.example.mangiaebasta.model.MenuWImage
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @Composable
-fun MenuList(menuList: List<MenuWImage>, navController: NavController) {
+fun MenuList(menuList: List<MenuWImage>, navController: NavController, model: MainViewModel) {
 
     LazyColumn(
         Modifier
@@ -21,11 +21,11 @@ fun MenuList(menuList: List<MenuWImage>, navController: NavController) {
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
     ) {
+
         items(menuList) { menu ->
-            MenuCard(menu, navController)
+            MenuCard(menu, navController, model)
         }
     }
-
 
 }
 

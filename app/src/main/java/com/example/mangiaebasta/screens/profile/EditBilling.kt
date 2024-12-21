@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -43,6 +45,7 @@ fun EditBilling(model: MainViewModel, user: User, navController: NavController) 
     var isExpireYearValid by remember { mutableStateOf(true) }
     var isCVVValid by remember { mutableStateOf(true) }
     var isCardFullNameValid by remember { mutableStateOf(true) }
+
 
     Column {
         TopBarWithBackArrow("Profile edit", navController)

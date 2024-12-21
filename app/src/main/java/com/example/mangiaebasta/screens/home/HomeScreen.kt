@@ -30,14 +30,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.composable
 import com.example.mangiaebasta.R
 import com.example.mangiaebasta.model.MenuWImage
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @Composable
-fun HomeScreen(model: MainViewModel, navController: NavHostController) {
+fun HomeScreen(
+    model: MainViewModel,
+    navController: NavHostController,
+    mainNavController: NavController
+) {
 
     val menuList = model.menuList.collectAsState()
     val location = model.location.collectAsState()
@@ -53,12 +59,14 @@ fun HomeScreen(model: MainViewModel, navController: NavHostController) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment =  Alignment.CenterHorizontally
-        ){
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Descrizione immagine",
-                modifier = Modifier.size(200.dp).padding(bottom = 16.dp)
+                modifier = Modifier
+                    .size(200.dp)
+                    .padding(bottom = 16.dp)
             )
             Text(
                 text = "Loading menus...",
@@ -67,18 +75,24 @@ fun HomeScreen(model: MainViewModel, navController: NavHostController) {
             Column(
                 modifier = Modifier.padding(30.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 CircularProgressIndicator()
             }
         }
     } else {
-        Column {
-            HomeScreenHeader(model)
-            HomeScreenBody(model, menuList.value, location.value, navController)
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .zIndex(1f)
+                ) {
+                    HomeScreenHeader(model)
+                }
+                HomeScreenBody(model, menuList.value, location.value, navController)
+            }
         }
     }
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -149,12 +163,13 @@ fun HomeScreenBody(
     model: MainViewModel,
     menuList: List<MenuWImage>,
     location: Location?,
-    navController: NavController
+    navController: NavController,
 ) {
     val selectedSection = model.selectedSection.collectAsState()
 
     when (selectedSection.value) {
-        1 -> MenuList(menuList, navController)
+        //1 -> SwipeableMenus(menuList, navController, model)
+        1 -> MenuList(menuList, navController, model)
         2 -> MenuMap(menuList, location, navController)
     }
 }

@@ -13,15 +13,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mangiaebasta.model.MenuWImage
+import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @Composable
-fun MenuCard(menu: MenuWImage, navController: NavController) {
+fun MenuCard(menu: MenuWImage, navController: NavController, model: MainViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         shape = RoundedCornerShape(12.dp),
-        onClick = { navController.navigate("menuDetail/${menu.menu.mid}/${menu.image}") }
+        onClick = {
+            model.setImageForDetail(menu.image)
+            navController.navigate("menuDetail/${menu.menu.mid}")
+        }
     ) {
         Row(
             modifier = Modifier

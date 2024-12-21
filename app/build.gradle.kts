@@ -47,6 +47,7 @@ android {
 dependencies {
 
     implementation(libs.play.services.location)
+    implementation(libs.androidx.storage)
     //Room
     val room_version = "2.6.1"
 
@@ -123,6 +124,9 @@ dependencies {
     implementation ("androidx.compose.material3:material3:1.3.1")
 
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+
+
 
 
 }
