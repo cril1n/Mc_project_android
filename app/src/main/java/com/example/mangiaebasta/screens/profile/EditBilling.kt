@@ -31,7 +31,8 @@ import com.example.mangiaebasta.model.User
 import com.example.mangiaebasta.components.TopBarWithBackArrow
 import com.example.mangiaebasta.viewmodel.MainViewModel
 @Composable
-fun EditBilling(model: MainViewModel, user: User, navController: NavController) {
+fun EditBilling(model: MainViewModel, navController: NavController) {
+    val user = model.user.collectAsState().value
     val isEditBilling by model.isEditBilling.collectAsState()
 
     var cardNumberForm by remember { mutableStateOf(user.cardNumber) }

@@ -4,6 +4,6 @@ import androidx.compose.runtime.Composable
 import com.example.mangiaebasta.model.User
 
 @Composable
-fun OrderTrack(user: User) {
+fun OrderTrack() {
 
 }

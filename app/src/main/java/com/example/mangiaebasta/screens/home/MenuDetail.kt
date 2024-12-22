@@ -1,7 +1,6 @@
 package com.example.mangiaebasta.screens.home
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -22,22 +21,16 @@ import com.example.mangiaebasta.viewmodel.MainViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import kotlinx.coroutines.CoroutineStart
+import com.example.mangiaebasta.LoadingScreen
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
-@OptIn(ExperimentalEncodingApi::class)
+
 @Composable
 fun MenuDetail(mid: Int, navController: NavController, model: MainViewModel) {
     val menuDetailed by model.menuDetailed.collectAsState()
@@ -111,7 +104,7 @@ fun MenuDetail(mid: Int, navController: NavController, model: MainViewModel) {
                     Button(
                         onClick = {
                             val jsonString = Json.encodeToString(menuDetailed)
-                            navController.navigate("menuDetail/${jsonString}")
+                            navController.navigate("orderCheckOut/${jsonString}")
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -122,12 +115,7 @@ fun MenuDetail(mid: Int, navController: NavController, model: MainViewModel) {
                 }
             }
         } else {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            LoadingScreen("Loading menu details...")
         }
     }
 }

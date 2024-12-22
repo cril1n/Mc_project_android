@@ -264,13 +264,16 @@ class MainViewModel(
 
     //PROFILE
 
-    private val _startDestination = MutableStateFlow("firstRegistration")
-    val startDestination: StateFlow<String> = _startDestination
-
-    fun setStartDestination(value: String) {
-        _startDestination.value = value
-
+    fun isUserRegistered() : Boolean {
+        if (user.value.firstName.isNotEmpty() || user.value.lastName.isNotEmpty()) {
+            Log.d("MainViewModel", "User name is not empty")
+            return true
+        } else {
+            Log.d("MainViewModel", "User name is empty")
+            return false
+        }
     }
+
 
     // EDIT PROFILE
 
@@ -304,7 +307,7 @@ class MainViewModel(
             "updateUserName",
             "User name data updated with new values: ${_user.value.firstName}, ${_user.value.lastName}"
         )
-        setStartDestination("profile")
+
         CoroutineScope(Dispatchers.Main).launch {
             CommunicationManager.updateUser(_user.value)
             dataStoreManager.saveUser(_user.value)

@@ -77,7 +77,7 @@ fun PrimaRegistrazione(model: MainViewModel, navController: NavHostController) {
                     model.setFirstNameForm(firstNameForm)
                     model.setLastNameForm(lastNameForm)
                     model.updateUserNameData()
-                    navController.navigate("profile")
+                    navController.navigate("profileScreen")
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = isSubmitEnabled, // Abilita solo se entrambi i campi sono pieni

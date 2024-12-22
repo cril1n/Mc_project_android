@@ -1,6 +1,7 @@
 package com.example.mangiaebasta
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -15,29 +16,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.example.mangiaebasta.screens.home.Home
+import androidx.navigation.navArgument
+import com.example.mangiaebasta.screens.home.HomeScreen
+import com.example.mangiaebasta.screens.home.MenuDetail
+import com.example.mangiaebasta.screens.home.OrderCheckOut
 import com.example.mangiaebasta.screens.order.OrderTrack
-import com.example.mangiaebasta.screens.profile.Profile
+import com.example.mangiaebasta.screens.profile.EditBilling
+import com.example.mangiaebasta.screens.profile.EditProfile
+import com.example.mangiaebasta.screens.profile.LastOrderScreen
+import com.example.mangiaebasta.screens.profile.PrimaRegistrazione
+import com.example.mangiaebasta.screens.profile.ProfileScreen
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
-data class TopLevelRoute(val name: String, val route: String, val icon: ImageVector)
-
-val topLevelRoutes = listOf(
-    TopLevelRoute("Home", "home", Icons.Default.Home),
-    TopLevelRoute("OrderTrack", "order track", Icons.Default.ShoppingCart),
-    TopLevelRoute("Profile", "profile", Icons.Default.Person)
-)
 @SuppressLint("RestrictedApi")
 @Composable
 fun Root(model: MainViewModel) {
-    val user = model.user.collectAsState()
+
+
+
     val navController = rememberNavController()
 
     Scaffold(
@@ -45,37 +52,106 @@ fun Root(model: MainViewModel) {
             BottomNavigation {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
-                topLevelRoutes.forEach { topLevelRoute ->
-                    BottomNavigationItem(
-                        icon = {
-                            Icon(
-                                topLevelRoute.icon,
-                                contentDescription = topLevelRoute.name
-                            )
-                        },
-                        label = { Text(topLevelRoute.name) },
-                        selected = currentDestination?.route == topLevelRoute.route,
-                        onClick = {
-                            navController.navigate(topLevelRoute.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = false
-                                }
-                                launchSingleTop = true
-                                restoreState = true
+
+                BottomNavigationItem(
+                    icon = {
+                        Icon(
+                            Icons.Default.Home,
+                            contentDescription = "Home"
+                        )
+                    },
+                    label = { Text("Home") },
+                    selected = currentDestination?.route == "homeScreen" || currentDestination?.route == "menuDetail/{mid}" || currentDestination?.route == "orderCheckOut/{menuString}",
+                    onClick = {
+                        navController.navigate("home_stack") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = false
                             }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                    )
-                }
+                    }
+                )
+
+                BottomNavigationItem(
+                    icon = {
+                        Icon(
+                            Icons.Default.ShoppingCart,
+                            contentDescription = "Order Track"
+                        )
+                    },
+                    label = { Text("Order Track") },
+                    selected = currentDestination?.route == "orderTrack",
+                    onClick = {
+                        navController.navigate("orderTrack") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = false
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+
+                BottomNavigationItem(
+                    icon = {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = "Profile"
+                        )
+                    },
+                    label = { Text("Profile") },
+                    selected = currentDestination?.route == "firstRegistration" || currentDestination?.route == "profileScreen" || currentDestination?.route == "profileEdit" || currentDestination?.route == "billingEdit" || currentDestination?.route == "lastOrder",
+                    onClick = {
+                        navController.navigate("profile_stack") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = false
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
+
         }
     ) { innerPadding ->
-        NavHost(navController, startDestination = "home", Modifier.padding(innerPadding)) {
-            composable("home") { Home(model, user.value, navController) }
-            composable("order track") { OrderTrack(user.value) }
-            composable("profile") { Profile(model, user.value) }
-        }
-    }
+        NavHost(navController, startDestination = "home_stack", Modifier.padding(innerPadding)) {
 
+            navigation(startDestination = "homeScreen", route = "home_stack") {
+                composable("homeScreen") { HomeScreen(model, navController) }
+                composable(
+                    "menuDetail/{mid}",
+                    arguments = listOf(
+                        navArgument("mid") { type = NavType.IntType }),
+                ) { backStackEntry ->
+                    val mid = backStackEntry.arguments?.getInt("mid")
+                    MenuDetail(mid!!, navController, model)
+                }
+                composable(
+                    "orderCheckOut/{menuString}",
+                    arguments = listOf(
+                        navArgument("menuString") { type = NavType.StringType }),
+                ) { backStackEntry ->
+                    val menuString = backStackEntry.arguments?.getString("menuString")
+                    OrderCheckOut(menuString!!, navController, model)
+                }
+            }
+
+            composable("orderTrack") { OrderTrack() }
+
+            navigation(startDestination = "profileScreen", route = "profile_stack") {
+                composable("firstRegistration") { PrimaRegistrazione(model, navController) }
+                composable("profileScreen") { ProfileScreen(model, navController) }
+                composable("profileEdit") { EditProfile(model, navController) }
+                composable("billingEdit") { EditBilling(model, navController) }
+                composable("lastOrder") { LastOrderScreen(model, navController) }
+            }
+        }
+
+    }
 }
+
+
 
 

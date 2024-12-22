@@ -113,27 +113,7 @@ fun MyApp(model: MainViewModel) {
                 }
             }
         } else {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment =  Alignment.CenterHorizontally
-            ){
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Descrizione immagine",
-                    modifier = Modifier.size(200.dp).padding(bottom = 16.dp)
-                )
-                Text(
-                    text = "Loading menus...",
-                    fontSize = 20.sp,
-                )
-                Column(
-                    modifier = Modifier.padding(30.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ){
-                    CircularProgressIndicator()
-                }
-            }
+            LoadingScreen("Initializing...")
         }
     }
 

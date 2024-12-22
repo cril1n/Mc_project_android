@@ -34,6 +34,7 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.example.mangiaebasta.LoadingScreen
 import com.example.mangiaebasta.R
 import com.example.mangiaebasta.model.MenuWImage
 import com.example.mangiaebasta.viewmodel.MainViewModel
@@ -42,7 +43,6 @@ import com.example.mangiaebasta.viewmodel.MainViewModel
 fun HomeScreen(
     model: MainViewModel,
     navController: NavHostController,
-    mainNavController: NavController
 ) {
 
     val menuList = model.menuList.collectAsState()
@@ -56,29 +56,7 @@ fun HomeScreen(
     }
 
     if (menuList.value.isEmpty()) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Descrizione immagine",
-                modifier = Modifier
-                    .size(200.dp)
-                    .padding(bottom = 16.dp)
-            )
-            Text(
-                text = "Loading menus...",
-                fontSize = 20.sp,
-            )
-            Column(
-                modifier = Modifier.padding(30.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
-            }
-        }
+        LoadingScreen("Loading menus...")
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
             Column {

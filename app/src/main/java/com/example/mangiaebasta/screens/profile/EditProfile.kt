@@ -31,7 +31,8 @@ import com.example.mangiaebasta.components.TopBarWithBackArrow
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @Composable
-fun EditProfile(model: MainViewModel, user: User, navController: NavController) {
+fun EditProfile(model: MainViewModel, navController: NavController) {
+    val user = model.user.collectAsState().value
     val isEditProfile by model.isEditProfile.collectAsState()
 
     // Usa remember per mantenere lo stato locale dei campi
