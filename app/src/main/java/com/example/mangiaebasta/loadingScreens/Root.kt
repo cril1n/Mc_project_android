@@ -85,7 +85,7 @@ fun Root(model: MainViewModel) {
     ) { innerPadding ->
         NavHost(navController, startDestination = "home", Modifier.padding(innerPadding)) {
             composable("home") { Home(model, user.value) }
-            composable("order track") { OrderTrack(user.value) }
+            composable("order track") { OrderTrack(model, user.value) }
             composable("profile") { Profile(model, user.value) }
         }
     }

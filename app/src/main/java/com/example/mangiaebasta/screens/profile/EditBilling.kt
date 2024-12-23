@@ -1,13 +1,17 @@
 package com.example.mangiaebasta.screens.profile
 
 import android.util.Log
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -43,14 +47,15 @@ fun EditBilling(model: MainViewModel, user: User, navController: NavController) 
     var isExpireYearValid by remember { mutableStateOf(true) }
     var isCVVValid by remember { mutableStateOf(true) }
     var isCardFullNameValid by remember { mutableStateOf(true) }
-
+    val scrollState = rememberScrollState()
     Column {
         TopBarWithBackArrow("Profile edit", navController)
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 20.dp),
+                .padding(top = 20.dp)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(

@@ -12,6 +12,7 @@ import com.example.mangiaebasta.datasource.DatabaseManager
 import com.example.mangiaebasta.datasource.DatastoreManager
 import com.example.mangiaebasta.datasource.LocationManager
 import com.example.mangiaebasta.model.MenuDetailed
+import com.example.mangiaebasta.model.MenuImage
 import com.example.mangiaebasta.model.User
 import com.example.mangiaebasta.model.MenuWImage
 import com.example.mangiaebasta.repositories.ImageRepo
@@ -98,7 +99,7 @@ class MainViewModel(
                 true
             } else {
                 Log.d(TAG, "Not first run sid: $sid, uid: $uid")
-                CommunicationManager.setSidUid(sid!!, uid!!)
+                CommunicationManager.   setSidUid(sid!!, uid!!)
                 _firstRun.value = false
                 _initialized.value = true
                 false
@@ -345,6 +346,27 @@ class MainViewModel(
             }
             else -> return false
         }
+    }
+
+    //ORDER TRACK
+
+    private val _lastOid = MutableStateFlow<Int?>(null)
+    val lastOid: StateFlow<Int?> = _lastOid
+
+    private val _imageMenu = MutableStateFlow<MenuImage?>(null)
+    val imageMenu: StateFlow<MenuImage?> = _imageMenu
+
+    fun setImageMenu(mid: Int){
+        CoroutineScope(Dispatchers.Main).launch {
+            _imageMenu.value = databaseManager.getImageFromDatabase(mid)
+        }
+    }
+
+    fun setLastOid() {
+        CoroutineScope(Dispatchers.Main).launch {
+            _lastOid.value = CommunicationManager.getUser()?.lastOid
+        }
+
     }
 
 }
