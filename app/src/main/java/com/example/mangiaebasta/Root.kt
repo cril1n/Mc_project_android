@@ -137,7 +137,7 @@ fun Root(model: MainViewModel) {
                     navArgument("menuString") { type = NavType.StringType }),
             ) { backStackEntry ->
                 val menuString = backStackEntry.arguments?.getString("menuString")
-                OrderTrack(model, menuString!!)
+                OrderTrack(model, navController, menuString!!)
             }
 
             navigation(startDestination = "profileScreen", route = "profile_stack") {

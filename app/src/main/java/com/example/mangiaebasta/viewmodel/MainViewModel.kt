@@ -255,6 +255,17 @@ class MainViewModel(
         _orderOnDelivery.value = value
     }
 
+    private val _orderOnFocus = MutableStateFlow(false)
+    val orderOnFocus: StateFlow<Boolean> = _orderOnFocus
+
+    fun setOrderOnFocus(value: Boolean) {
+        _orderOnFocus.value = value
+    }
+
+
+
+
+
     private val _initialRegion = MutableStateFlow(InitialRegion(LocationData(null, null), null, null))
     val initialRegion: StateFlow<InitialRegion> = _initialRegion
 

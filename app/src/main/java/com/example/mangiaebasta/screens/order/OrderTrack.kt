@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +25,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.mangiaebasta.R
 import com.example.mangiaebasta.model.LocationData
 import com.example.mangiaebasta.model.MenuDetailed
@@ -32,7 +35,18 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Composable
-fun OrderTrack(model: MainViewModel, menuDetailed: String) {
+fun OrderTrack(model: MainViewModel, navController: NavController, menuDetailed: String) {
+
+    val currentBackStackEntry = navController.currentBackStackEntryAsState()
+
+    LaunchedEffect(currentBackStackEntry.value) {
+        if (currentBackStackEntry.value?.destination?.route == "orderTrack/{menuString}") {
+            model.setOrderOnFocus(true)
+        } else {
+            model.setOrderOnFocus(false)
+        }
+        Log.d("OrderTrack", model.orderOnFocus.value.toString())
+    }
 
     model.setInitialRegion()
 
