@@ -18,6 +18,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,9 +39,10 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Composable
-fun OrderTrack(model: MainViewModel, navController: NavController, menuDetailed: String) {
+fun OrderTrack(model: MainViewModel, navController: NavController, menuString: String) {
 
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
+    val menu  = model.menuOrdered.collectAsState()
 
     LaunchedEffect(currentBackStackEntry.value) {
         if (currentBackStackEntry.value?.destination?.route == "orderTrack/{menuString}") {
@@ -54,16 +59,7 @@ fun OrderTrack(model: MainViewModel, navController: NavController, menuDetailed:
     val initialRegion = model.initialRegion.collectAsState()
 
     val jsonString: String = Json.encodeToString(
-        MenuDetailed(
-            1,
-            "Pizza",
-            2.4,
-            LocationData(45.56, 9.23),
-            1,
-            10,
-            "Pizza",
-            "Pizza"
-        )
+        menu
     )
 
     Column(

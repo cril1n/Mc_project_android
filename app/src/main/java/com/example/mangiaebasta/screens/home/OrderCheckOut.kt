@@ -35,6 +35,7 @@ import com.example.mangiaebasta.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Composable
@@ -99,6 +100,8 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
                         model.sendOrder()
+                        model.setMenuOrdered(menu!!)
+                        navController.navigate("orderTrack/${menuString}")
                     }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)

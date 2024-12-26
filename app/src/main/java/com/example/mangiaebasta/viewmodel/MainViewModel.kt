@@ -262,7 +262,12 @@ class MainViewModel(
         _orderOnFocus.value = value
     }
 
+    private val _menuOrdered = MutableStateFlow<MenuDetailed?>(null)
+    val menuOrdered: StateFlow<MenuDetailed?> = _menuOrdered
 
+    fun setMenuOrdered(value: MenuDetailed) {
+        _menuOrdered.value = value
+    }
 
 
 
