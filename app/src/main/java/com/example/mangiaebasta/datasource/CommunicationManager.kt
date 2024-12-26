@@ -133,9 +133,7 @@ object CommunicationManager {
         Log.d(TAG, "sid or uid are null, create a user before")
         return null
     }
-    //Request body: UpdateUserRequest(firstName=John, lastName=Doe, cardFullName=John Doe, cardNumber=1234567890123456, cardExpireMonth=2, cardExpireYear=25, cardCVV=123, sid=XMLMFCAp6vBzf9I7jpOmIyskd4R0YLjnLhY0kQku1chKQT9bAHPZNUG6YM7yaeK8)
-    //Request body: UpdateUserRequest(firstName=Marcello, lastName=Ascamo, cardFullName=, cardNumber=, cardExpireMonth=0, cardExpireYear=0, cardCVV=, sid=MlLAfQLL30ArImPGdCPJAzVIv1cyAN9smkJP5geMTcbGNawS20lWhUuOTOkB4D6z)
-    //Request body: UpdateUserRequest(firstName=Marcello, lastName=Ascani, cardFullName=null, cardNumber=null, cardExpireMonth=0, cardExpireYear=0, cardCVV=null, sid=Aw3yIqqR5zwkN7sGE9VhbyUNbfoidMa2P3uhj4ri6YJRQIAAJ9xqvjEnEWS3dPM2)
+
     suspend fun updateUser(user: User): String {
         Log.d(TAG, "updateUser")
         if (sid != null && uid != null) {
@@ -160,8 +158,6 @@ object CommunicationManager {
         Log.d(TAG, "sid or uid are null, create a user before")
         return "Something went wrong"
     }
-
-
 
     suspend fun sendOrder(): OrderResponse? {
         Log.d(TAG, "sendOrder")

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Card
@@ -71,7 +72,8 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = 4.dp
+                elevation = 4.dp,
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     menu?.let {
@@ -84,6 +86,7 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(text = "Address Details", style = MaterialTheme.typography.h6)
                     Spacer(modifier = Modifier.height(8.dp))
+                    Log.d("OrderCheckOut", "Adress: $address")
                     Text(text = "Country: ${address?.countryCode}")
                     Text(text = "Region: ${address?.adminArea}")
                     Text(text = "City: ${address?.locality}")
@@ -121,14 +124,17 @@ fun UserStatusDialog(userStatus: String) {
             "Missing personal info",
             "You need to complete your personal info before ordering"
         )
+
         "missingBilling" -> Pair(
             "Missing billing info",
             "You need to complete your billing info before ordering"
         )
+
         "onDelivery" -> Pair(
             "Order already on delivery",
             "You already have an order on delivery, you can check the status in the order section"
         )
+
         else -> null
     }
 

@@ -31,6 +31,7 @@ fun MenuMap(
     menuList: List<MenuWImage>,
     location: Location?,
     navController: NavController,
+    model: MainViewModel
 ) {
 
     val mapViewportState = rememberMapViewportState {
@@ -38,7 +39,7 @@ fun MenuMap(
             if (location != null) {
                 center(Point.fromLngLat(location.longitude, location.latitude))
             }
-            zoom(15.5)
+            zoom(14.0)
             pitch(0.0)
         }
     }
@@ -49,16 +50,6 @@ fun MenuMap(
         mapViewportState = mapViewportState
     ) {
 
-        // Centra la mappa manualmente ogni volta che la posizione cambia
-        LaunchedEffect(location) {
-            mapViewportState.setCameraOptions {
-                if (location != null) {
-                    center(Point.fromLngLat(location.longitude, location.latitude))
-                }
-                zoom(14.0)  // Zoom a livello strada
-                pitch(0.0)  // Vista dall'alto perpendicolare
-            }
-        }
 
         // Disabilita il puck di default
         MapEffect(Unit) { mapView ->
@@ -107,7 +98,7 @@ fun MenuMap(
             )
 
             PointAnnotation(
-                point = Point.fromLngLat(menu.menu.location.lng, menu.menu.location.lat),
+                point = Point.fromLngLat(menu.menu.location.lng!!, menu.menu.location.lat!!),
                 init = fun PointAnnotationState.() {
                     iconImage = menuMarker
                     textField = menu.menu.name
@@ -120,7 +111,8 @@ fun MenuMap(
                     Log.d("MenuMap", "Cliccato su ${menu.menu.name}")
 
                     // Navigazione (se necessario)
-                    navController.navigate("menuDetail/${menu.menu.mid}/${menu.image}")
+                    model.setImageForDetail(menu.image)
+                    navController.navigate("menuDetail/${menu.menu.mid}")
 
                     true // Return true per indicare che il clic è stato gestito
                 }
