@@ -28,12 +28,12 @@ fun LoadingScreen(textToShow: String) {
         Image(
             painter = painterResource(id = R.drawable.logo),
             contentDescription = "Descrizione immagine",
-            modifier = Modifier.size(300.dp).padding(bottom = 16.dp)
+            modifier = Modifier.size(250.dp).padding(bottom = 16.dp)
         )
         Text(
             text = textToShow,
             fontWeight = FontWeight.Bold,
-            fontSize = 25.sp,
+            fontSize = 20.sp,
         )
         Column(
             modifier = Modifier.padding(30.dp),

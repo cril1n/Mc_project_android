@@ -15,8 +15,13 @@ import com.example.mangiaebasta.datasource.CommunicationManager
 import com.example.mangiaebasta.datasource.DatabaseManager
 import com.example.mangiaebasta.datasource.DatastoreManager
 import com.example.mangiaebasta.datasource.LocationManager
+import com.example.mangiaebasta.model.InitialRegion
+import com.example.mangiaebasta.model.LocationData
 import com.example.mangiaebasta.model.MenuDetailed
 import com.example.mangiaebasta.model.MenuWImage
+import com.example.mangiaebasta.model.OrderResponse
+import com.example.mangiaebasta.model.OrderResponseCompleted
+import com.example.mangiaebasta.model.OrderResponseOnDelivery
 import com.example.mangiaebasta.model.User
 import com.example.mangiaebasta.repositories.ImageRepo
 import kotlinx.coroutines.CoroutineScope
@@ -25,6 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.math.abs
 
 
 class MainViewModel(
@@ -235,8 +241,50 @@ class MainViewModel(
 
     //ORDER
 
-    private val _onDelivery = MutableStateFlow(false)
-    val onDelivery: StateFlow<Boolean> = _onDelivery
+    private val _lastOrder = MutableStateFlow<OrderResponseCompleted?>(null)
+    val lastOrder: StateFlow<OrderResponseCompleted?> = _lastOrder
+
+    private val _orderID = MutableStateFlow<Int?>(null)
+    val orderID: StateFlow<Int?> = _orderID
+
+    fun setOrderID(value: Int) {
+        _orderID.value = value
+    }
+
+    fun setlastOrder(value: OrderResponseCompleted) {
+        _lastOrder.value = value
+    }
+
+    private val _orderOnDelivery = MutableStateFlow<OrderResponseOnDelivery?>(null)
+   // private val _orderOnDelivery = MutableStateFlow<OrderResponseOnDelivery?>(OrderResponseOnDelivery(1, 1, 37409, "2024-12-26T16:24:14.964Z", "2024-12-26T16:24:14.964Z", "ON_DELIVERY", LocationData(45.4642, 9.19 ), LocationData(45.47, 9.20)))
+    val orderOnDelivery: StateFlow<OrderResponseOnDelivery?> = _orderOnDelivery
+
+    fun setOrderOnDelivery() {
+        var value: OrderResponseOnDelivery? = null
+        CoroutineScope(Dispatchers.Main).launch {
+            _orderID.value?.let {
+                value = CommunicationManager.getOrderInfo(it) as OrderResponseOnDelivery?
+            }
+        }
+        _orderOnDelivery.value = value
+    }
+
+    private val _orderOnFocus = MutableStateFlow(false)
+    val orderOnFocus: StateFlow<Boolean> = _orderOnFocus
+
+    fun setOrderOnFocus(value: Boolean) {
+        _orderOnFocus.value = value
+    }
+
+    private val _initialRegion = MutableStateFlow(InitialRegion(LocationData(null, null), null, null))
+    val initialRegion: StateFlow<InitialRegion> = _initialRegion
+
+    fun setInitialRegion(orderData: OrderResponse) {
+        initialRegion.value.center.lat = (orderData.currentPosition.lat?.plus(orderData.deliveryLocation.lat!!))?.div(2)
+        initialRegion.value.center.lng = (orderData.currentPosition.lng?.plus(orderData.deliveryLocation.lng!!))?.div(2)
+        initialRegion.value.deltaX = abs(orderData.currentPosition.lat!! - orderData.deliveryLocation.lat!!)
+        initialRegion.value.deltaY = abs(orderData.currentPosition.lng!! - orderData.deliveryLocation.lng!!)
+    }
 
 
     //ORDERCHECKOUT
@@ -254,7 +302,7 @@ class MainViewModel(
     fun setShowDialog(value: Boolean) {
         _showDialog.value = value
     }
-    fun sendOrder() {
+    fun sendOrder(mid: Int) {
         if (_user.value.firstName == "" || user.value.lastName == "") {
             _userStatus.value = "missingInfo"
             return
@@ -266,23 +314,31 @@ class MainViewModel(
             _userStatus.value = "missingBilling"
             return
         }
-        if (onDelivery.value) {
+        if (orderOnDelivery.value != null) {
             _userStatus.value = "onDelivery"
             return
         }
+        var orderResponse: OrderResponse? = null
+        CoroutineScope(Dispatchers.Main).launch {
+            orderResponse = CommunicationManager.sendOrder(mid, location.value!!.latitude, location.value!!.longitude)
+        }
+        orderResponse?.let {
+            setOrderID(it.oid)
+            _user.value.lastOid = it.oid
+            setInitialRegion(it)
+        }
+        setOrderOnDelivery()
+
+        _userStatus.value = ""
+
+        _showDialog.value = false
+
     }
+
 
     //ORDER TRACK
 
-    private val _lastOid = MutableStateFlow<Int?>(null)
-    val lastOid: StateFlow<Int?> = _lastOid
 
-    fun setLastOid(oid: Int) {
-        CoroutineScope(Dispatchers.Main).launch {
-            _lastOid.value = CommunicationManager.getUser()?.lastOid
-        }
-
-    }
 
     //PROFILE
 
@@ -334,6 +390,7 @@ class MainViewModel(
             CommunicationManager.updateUser(_user.value)
             dataStoreManager.saveUser(_user.value)
         }
+
         _userStatus.value = ""
     }
 

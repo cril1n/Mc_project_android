@@ -148,7 +148,7 @@ fun HomeScreenBody(
     when (selectedSection.value) {
         //1 -> SwipeableMenus(menuList, navController, model)
         1 -> MenuList(menuList, navController, model)
-        2 -> MenuMap(menuList, location, navController)
+        2 -> MenuMap(menuList, location, navController, model)
     }
 }
 

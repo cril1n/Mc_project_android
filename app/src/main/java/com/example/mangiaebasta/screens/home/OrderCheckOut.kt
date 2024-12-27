@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Card
@@ -49,7 +50,7 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
         Log.d("OrderCheckOut", "$address")
     }
 
-    UserStatusDialog(model, navController)
+    UserStatusDialog(model, navController, menuString)
 
     Column {
         TopBarWithBackArrow("Order check out", navController)
@@ -71,7 +72,8 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = 4.dp
+                elevation = 4.dp,
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     menu?.let {
@@ -85,6 +87,7 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
                     Text(text = "Address Details", style = MaterialTheme.typography.h6)
                     Log.d("OrderCheckOut", "$address")
                     Spacer(modifier = Modifier.height(8.dp))
+                    Log.d("OrderCheckOut", "Adress: $address")
                     Text(text = "Country: ${address?.countryCode}")
                     Text(text = "Region: ${address?.adminArea}")
                     Text(text = "City: ${address?.locality}")
@@ -97,8 +100,9 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
 
-                        model.sendOrder()
+                        menu?.mid?.let { model.sendOrder(it) }
                         model.setShowDialog()
+                        navController.navigate("orderTrack/${menuString}")
                     }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -112,36 +116,33 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
 
 }
 
-
 @Composable
-fun UserStatusDialog(model: MainViewModel, navController: NavHostController) {
+fun UserStatusDialog(model: MainViewModel, navController: NavHostController, menuString: String) {
+    Log.d("UserStatusDialog", "nav graph ${navController.visibleEntries}")
     val userStatus by model.userStatus.collectAsState()
-    // Stato per mostrare o nascondere il dialogo
     val showDialog by model.showDialog.collectAsState()
 
-    Log.d("UserStatusDialog", "UserStatus: $userStatus")
-    Log.d("UserStatusDialog", "ShowDialog: $showDialog")
-
-    // Contenuti dinamici del dialogo in base a `userStatus`
+    // Struttura per mappare lo stato dell'utente ai dati del dialogo e alla rotta
     val dialogData = when (userStatus) {
-        "missingInfo" -> Pair(
+        "missingInfo" -> Triple(
             "Missing personal info",
-            "You need to complete your personal info before ordering"
+            "You need to complete your personal info before ordering",
+            "profileEdit"
         )
-
-        "missingBilling" -> Pair(
+        "missingBilling" -> Triple(
             "Missing billing info",
-            "You need to complete your billing info before ordering"
+            "You need to complete your billing info before ordering",
+            "billingEdit"
         )
-        "onDelivery" -> Pair(
+        "onDelivery" -> Triple(
             "Order already on delivery",
-            "You already have an order on delivery, you can check the status in the order section"
+            "You already have an order on delivery, you can check the status in the order section",
+            "orderTrack/${menuString}"
         )
         else -> null
     }
 
-    // Mostra il dialogo solo se `dialogData` non è null e `showDialog` è true
-    dialogData?.let { (title, message) ->
+    dialogData?.let { (title, message, route) ->
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = {
@@ -157,7 +158,7 @@ fun UserStatusDialog(model: MainViewModel, navController: NavHostController) {
                     TextButton(
                         onClick = {
                             model.setShowDialog(false)
-                            // Aggiungi azioni di conferma qui
+                            navController.navigate(route)
                         }
                     ) {
                         Text("Confirm")
@@ -176,5 +177,3 @@ fun UserStatusDialog(model: MainViewModel, navController: NavHostController) {
         }
     }
 }
-
-

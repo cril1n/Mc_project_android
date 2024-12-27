@@ -25,7 +25,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
@@ -133,9 +132,7 @@ object CommunicationManager {
         Log.d(TAG, "sid or uid are null, create a user before")
         return null
     }
-    //Request body: UpdateUserRequest(firstName=John, lastName=Doe, cardFullName=John Doe, cardNumber=1234567890123456, cardExpireMonth=2, cardExpireYear=25, cardCVV=123, sid=XMLMFCAp6vBzf9I7jpOmIyskd4R0YLjnLhY0kQku1chKQT9bAHPZNUG6YM7yaeK8)
-    //Request body: UpdateUserRequest(firstName=Marcello, lastName=Ascamo, cardFullName=, cardNumber=, cardExpireMonth=0, cardExpireYear=0, cardCVV=, sid=MlLAfQLL30ArImPGdCPJAzVIv1cyAN9smkJP5geMTcbGNawS20lWhUuOTOkB4D6z)
-    //Request body: UpdateUserRequest(firstName=Marcello, lastName=Ascani, cardFullName=null, cardNumber=null, cardExpireMonth=0, cardExpireYear=0, cardCVV=null, sid=Aw3yIqqR5zwkN7sGE9VhbyUNbfoidMa2P3uhj4ri6YJRQIAAJ9xqvjEnEWS3dPM2)
+
     suspend fun updateUser(user: User): String {
         Log.d(TAG, "updateUser")
         if (sid != null && uid != null) {
@@ -161,22 +158,17 @@ object CommunicationManager {
         return "Something went wrong"
     }
 
-
-
-    suspend fun sendOrder(): OrderResponse? {
+    suspend fun sendOrder(mid: Int, latitude: Double, longitude: Double): OrderResponse? {
         Log.d(TAG, "sendOrder")
-
         if (sid != null && uid != null) {
-            val url = "$BASE_URL/menu/1/buy"
-            val deliveryLocation = LocationData(
-                lat = 45.46,
-                lng = 9.19
-            )
+            val url = "$BASE_URL/menu/${mid}/buy"
+            val locationData = LocationData(latitude, longitude)
             val requestBody = SendOrderRequest(
                 sid = sid!!,
-                deliveryLocation = deliveryLocation
+                deliveryLocation = locationData
             )
-            val httpResponse = genericRequest(url, HttpMethod.POST, requestBody = Json.encodeToString(requestBody))
+            val httpResponse = genericRequest(url, HttpMethod.POST, requestBody = requestBody)
+            Log.d(TAG, "Response: $httpResponse")
             val result: OrderResponse = httpResponse.body()
             Log.d(TAG, "Deserialized response: $result")
             return result

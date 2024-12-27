@@ -1,7 +1,6 @@
 package com.example.mangiaebasta
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -13,12 +12,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -81,9 +75,9 @@ fun Root(model: MainViewModel) {
                         )
                     },
                     label = { Text("Order Track") },
-                    selected = currentDestination?.route == "orderTrack",
+                    selected = currentDestination?.route == "orderTrack/{menuString}",
                     onClick = {
-                        navController.navigate("orderTrack") {
+                        navController.navigate("orderTrack/{menuString}") {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = false
                             }
@@ -138,9 +132,13 @@ fun Root(model: MainViewModel) {
                 }
             }
 
-            composable("orderTrack") { OrderTrack(
-                model = model
-            ) }
+            composable("orderTrack/{menuString}",
+                arguments = listOf(
+                    navArgument("menuString") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val menuString = backStackEntry.arguments?.getString("menuString")
+                OrderTrack(model, navController, menuString!!)
+            }
 
             navigation(startDestination = "profileScreen", route = "profile_stack") {
                 composable("firstRegistration") { PrimaRegistrazione(model, navController) }

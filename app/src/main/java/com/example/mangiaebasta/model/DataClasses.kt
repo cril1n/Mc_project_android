@@ -16,7 +16,7 @@ data class User(
     var cardExpireMonth: Int,
     var cardExpireYear: Int,
     var cardCVV: String,
-    val lastOid: Int,
+    var lastOid: Int,
     val orderStatus: String
 )
 
@@ -54,8 +54,14 @@ data class UpdateUserRequest(
 
 @Serializable
 data class LocationData(
-    val lat: Double,
-    val lng: Double
+    var lat: Double?,
+    var lng: Double?
+)
+
+data class InitialRegion(
+    val center: LocationData,
+    var deltaY: Double?,
+    var deltaX: Double?
 )
 
 @Serializable
@@ -64,9 +70,13 @@ data class SendOrderRequest(
     val deliveryLocation: LocationData
 )
 
+
 @Serializable
 data class OrderResponse(
     val status: String,
+    val oid: Int,
+    val deliveryLocation: LocationData,
+    val currentPosition: LocationData
 )
 
 @Serializable
