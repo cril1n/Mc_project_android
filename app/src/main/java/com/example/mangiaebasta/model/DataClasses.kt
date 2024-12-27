@@ -15,7 +15,9 @@ data class User(
     var cardNumber: String,
     var cardExpireMonth: Int,
     var cardExpireYear: Int,
-    var cardCVV: String
+    var cardCVV: String,
+    val lastOid: Int,
+    val orderStatus: String
 )
 
 @Serializable

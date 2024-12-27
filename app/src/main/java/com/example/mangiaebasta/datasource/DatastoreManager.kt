@@ -96,6 +96,8 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
         val CARD_EXPIRE_MONTH = stringPreferencesKey("card_expire_month")
         val CARD_EXPIRE_YEAR = stringPreferencesKey("card_expire_year")
         val CARD_CVV = stringPreferencesKey("card_cvv")
+        val LAST_OID = stringPreferencesKey("last_oid")
+        val ORDER_STATUS = stringPreferencesKey("order_status")
     }
 
     suspend fun saveUser( user: User) {
@@ -108,6 +110,8 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
             preferences[PreferencesKeys.CARD_EXPIRE_MONTH] = user.cardExpireMonth.toString()
             preferences[PreferencesKeys.CARD_EXPIRE_YEAR] = user.cardExpireYear.toString()
             preferences[PreferencesKeys.CARD_CVV] = user.cardCVV
+            preferences[PreferencesKeys.LAST_OID] = user.lastOid.toString()
+            preferences[PreferencesKeys.ORDER_STATUS] = user.orderStatus
         }
     }
 
@@ -120,7 +124,9 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
                 cardNumber = preferences[PreferencesKeys.CARD_NUMBER] ?: "",
                 cardExpireMonth = preferences[PreferencesKeys.CARD_EXPIRE_MONTH]?.toInt() ?: 0,
                 cardExpireYear = preferences[PreferencesKeys.CARD_EXPIRE_YEAR]?.toInt() ?: 0,
-                cardCVV = preferences[PreferencesKeys.CARD_CVV] ?: ""
+                cardCVV = preferences[PreferencesKeys.CARD_CVV] ?: "",
+                lastOid = preferences[PreferencesKeys.LAST_OID]?.toInt() ?: 0,
+                orderStatus = preferences[PreferencesKeys.ORDER_STATUS] ?: ""
             )
         }
     }

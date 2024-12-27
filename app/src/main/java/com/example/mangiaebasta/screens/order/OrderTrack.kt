@@ -28,7 +28,7 @@ import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderTrack(model: MainViewModel, user: User) {
+fun OrderTrack(model: MainViewModel) {
     val lastOid = model.lastOid.collectAsState()
     Log.d("OrderTrack", "lastOid: ${lastOid.value}")
 

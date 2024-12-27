@@ -1,8 +1,12 @@
 package com.example.mangiaebasta.viewmodel
 
 import android.Manifest
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.location.Address
+import android.location.Geocoder
 import android.location.Location
+import android.util.Base64
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.lifecycle.ViewModel
@@ -12,22 +16,22 @@ import com.example.mangiaebasta.datasource.DatabaseManager
 import com.example.mangiaebasta.datasource.DatastoreManager
 import com.example.mangiaebasta.datasource.LocationManager
 import com.example.mangiaebasta.model.MenuDetailed
-import com.example.mangiaebasta.model.MenuImage
-import com.example.mangiaebasta.model.User
 import com.example.mangiaebasta.model.MenuWImage
+import com.example.mangiaebasta.model.User
 import com.example.mangiaebasta.repositories.ImageRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+
 
 class MainViewModel(
     private val databaseManager: DatabaseManager,
     private val dataStoreManager: DatastoreManager,
-    private val locationManager: LocationManager
+    private val locationManager: LocationManager,
+    private val geocoder: Geocoder
 ) : ViewModel() {
     private val imageRepo = ImageRepo(databaseManager)
     private val TAG = MainViewModel::class.simpleName
@@ -42,6 +46,32 @@ class MainViewModel(
 
     private val _firstRun = MutableStateFlow(true)
     val firstRun: StateFlow<Boolean> = _firstRun
+
+    suspend fun checkFirstRun(): Boolean {
+        return try {
+            Log.d(TAG, "Checking first run")
+            sid = dataStoreManager.getSidFromDataStore().toString()
+            uid = dataStoreManager.getUidFromDataStore()
+            if (sid == null || sid == "null") {
+                Log.d(TAG, "First run")
+                _firstRun.value = true
+                _initialized.value = true
+                true
+            } else {
+                Log.d(TAG, "Not first run sid: $sid, uid: $uid")
+                CommunicationManager.setSidUid(sid!!, uid!!)
+                _firstRun.value = false
+                _initialized.value = true
+                false
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in checkFirstRun: $e")
+            false
+        }
+    }
+
+
+    //LOCATION
 
     private var _locationPermissionGranted = MutableStateFlow(false)
     val locationPermissionGranted: StateFlow<Boolean> = _locationPermissionGranted
@@ -65,69 +95,25 @@ class MainViewModel(
         }
     }
 
-    //USER
+    private var _address = MutableStateFlow<Address?>(null)
+    val address: StateFlow<Address?> = _address
 
-    private val _user = MutableStateFlow<User>(User("", "", "", "", 0, 0, ""))
-    val user: StateFlow<User> = _user
+    fun loadAdress() {
 
-    fun setUserData(user: User) {
-        _user.value = user
-    }
-
-
-    fun setUserDataField(field: String, value: String){
-        when (field) {
-            "firstName" -> _user.value.firstName = value
-            "lastName" -> _user.value.lastName = value
-            "cardFullName" -> _user.value.cardFullName = value
-            "cardNumber" -> _user.value.cardNumber = value
-            "cardExpireMonth" -> _user.value.cardExpireMonth = value.toInt()
-            "cardExpireYear" -> _user.value.cardExpireYear = value.toInt()
-            "cardCVV" -> _user.value.cardCVV = value
+        val addresses = location.value?.let {
+            geocoder.getFromLocation(
+                it.latitude,
+                it.longitude,
+                1
+            )
+        }
+        if (addresses != null) {
+            _address.value = addresses[0]
+            Log.d("MainViewModel", "Address: $address")
         }
     }
 
-    suspend fun checkFirstRun(): Boolean {
-        return try {
-            Log.d(TAG, "Checking first run")
-            sid = dataStoreManager.getSidFromDataStore().toString()
-            uid = dataStoreManager.getUidFromDataStore()
-            if (sid == null || sid == "null") {
-                Log.d(TAG, "First run")
-                _firstRun.value = true
-                _initialized.value = true
-                true
-            } else {
-                Log.d(TAG, "Not first run sid: $sid, uid: $uid")
-                CommunicationManager.   setSidUid(sid!!, uid!!)
-                _firstRun.value = false
-                _initialized.value = true
-                false
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error in checkFirstRun: $e")
-            false
-        }
-    }
-
-    suspend fun createNewUser() {
-        Log.d(TAG, "Creating new user")
-        try {
-            sid = CommunicationManager.createUser().sid
-            uid = CommunicationManager.createUser().uid
-            dataStoreManager.setSidInDataStore(sid)
-            dataStoreManager.setUidInDataStore(uid)
-            Log.d(TAG, "New user create, sid: $sid, uid: $uid")
-            _firstRun.value = false
-            _user.value = User("", "", "", "", 0, 0, "")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error in createNewUser: $e")
-        }
-
-    }
-
-
-    //HOME
+    //HOMESCREEN
 
     private val _selectedSection = MutableStateFlow(1)
     val selectedSection: StateFlow<Int> = _selectedSection
@@ -139,8 +125,6 @@ class MainViewModel(
             _selectedSection.value = 1
         }
     }
-
-    //HOMESCREEN
 
     private val _menuList = MutableStateFlow<List<MenuWImage>>(emptyList())
     val menuList: StateFlow<List<MenuWImage>> = _menuList
@@ -156,7 +140,7 @@ class MainViewModel(
             Log.d("MainViewModel", "Menu list loaded")
             val updatedList = rawList?.map { menu ->
                 val base64 = imageRepo.getImage(menu)
-                val byteArray = Base64.decode(base64)
+                val byteArray = Base64.decode(base64, Base64.DEFAULT)
                 val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
                 MenuWImage(
                     menu = menu,
@@ -169,15 +153,20 @@ class MainViewModel(
         }
     }
 
+
     //MENU DETAIL
 
-    private var _menuDetailed = MutableStateFlow(MenuDetailed(null, null, null, null,null, null, null, null))
+    private var _menuDetailed =
+        MutableStateFlow(MenuDetailed(null, null, null, null, null, null, null, null))
     val menuDetailed: StateFlow<MenuDetailed> = _menuDetailed
 
+    private var _imageMenuDetailed = MutableStateFlow<Bitmap?>(null)
+    val imageMenuDetailed: StateFlow<Bitmap?> = _imageMenuDetailed
+
+    @OptIn(ExperimentalEncodingApi::class)
     suspend fun loadMenuDetailed(mid: Int) {
         Log.d("MainViewModel", "Loading menu detailed")
         try {
-
             val menu = CommunicationManager.getMenuDetail(
                 mid,
                 location.value!!.latitude,
@@ -185,30 +174,128 @@ class MainViewModel(
             )
             if (menu != null) {
                 _menuDetailed.value = menu
+
             }
         } catch (e: Exception) {
-            Log.e("MainViewModel", "Error in loadMenuList: $e")
+            Log.e("MainViewModel", "Error in loadMenuDetail: $e")
         }
     }
 
-    //PROFILE
+    fun setImageForDetail(image: Bitmap) {
+        _imageMenuDetailed.value = image
+    }
+
+
+    //USER
+
+    private val _user = MutableStateFlow<User>(User("", "", "", "", 0, 0, "", 0, "" ))
+    val user: StateFlow<User> = _user
+
     //RECUPERO USER DAL DATASTORE
     init {
         viewModelScope.launch {
-            dataStoreManager.getUser().collect{
+            dataStoreManager.getUser().collect {
                 Log.d(TAG, "User from datastore: $it")
                 _user.value = it
             }
         }
     }
 
-
-    private val _startDestination = MutableStateFlow("firstRegistration")
-    val startDestination: StateFlow<String> = _startDestination
-
-    fun setStartDestination(value: String){
-        _startDestination.value = value
+    fun setUserData(user: User) {
+        _user.value = user
     }
+
+    fun setUserDataField(field: String, value: String) {
+        when (field) {
+            "firstName" -> _user.value.firstName = value
+            "lastName" -> _user.value.lastName = value
+            "cardFullName" -> _user.value.cardFullName = value
+            "cardNumber" -> _user.value.cardNumber = value
+            "cardExpireMonth" -> _user.value.cardExpireMonth = value.toInt()
+            "cardExpireYear" -> _user.value.cardExpireYear = value.toInt()
+            "cardCVV" -> _user.value.cardCVV = value
+        }
+    }
+
+    suspend fun createNewUser() {
+        Log.d(TAG, "Creating new user")
+        try {
+            sid = CommunicationManager.createUser().sid
+            uid = CommunicationManager.createUser().uid
+            dataStoreManager.setSidInDataStore(sid)
+            dataStoreManager.setUidInDataStore(uid)
+            Log.d(TAG, "New user create, sid: $sid, uid: $uid")
+            _firstRun.value = false
+            _user.value = User("", "", "", "", 0, 0, "", 0, "" )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in createNewUser: $e")
+        }
+
+    }
+
+    //ORDER
+
+    private val _onDelivery = MutableStateFlow(false)
+    val onDelivery: StateFlow<Boolean> = _onDelivery
+
+
+    //ORDERCHECKOUT
+
+    private var _userStatus = MutableStateFlow("")
+    var userStatus: MutableStateFlow<String> = _userStatus
+
+    private var _showDialog = MutableStateFlow(false)
+    var showDialog: MutableStateFlow<Boolean> = _showDialog
+
+    fun setShowDialog() {
+        if(_userStatus.value != "") _showDialog.value = true
+        else _showDialog.value = false
+    }
+    fun setShowDialog(value: Boolean) {
+        _showDialog.value = value
+    }
+    fun sendOrder() {
+        if (_user.value.firstName == "" || user.value.lastName == "") {
+            _userStatus.value = "missingInfo"
+            return
+        }
+        if (user.value.cardNumber == "" || _user.value.cardExpireMonth == 0 || user.value.cardExpireYear == 0
+            || _user.value.cardCVV == "" || _user.value.cardFullName == ""
+        ) {
+            Log.d("UserValue", "user value: ${user.value}")
+            _userStatus.value = "missingBilling"
+            return
+        }
+        if (onDelivery.value) {
+            _userStatus.value = "onDelivery"
+            return
+        }
+    }
+
+    //ORDER TRACK
+
+    private val _lastOid = MutableStateFlow<Int?>(null)
+    val lastOid: StateFlow<Int?> = _lastOid
+
+    fun setLastOid(oid: Int) {
+        CoroutineScope(Dispatchers.Main).launch {
+            _lastOid.value = CommunicationManager.getUser()?.lastOid
+        }
+
+    }
+
+    //PROFILE
+
+    fun isUserRegistered() : Boolean {
+        if (user.value.firstName.isNotEmpty() || user.value.lastName.isNotEmpty()) {
+            Log.d("MainViewModel", "User name is not empty")
+            return true
+        } else {
+            Log.d("MainViewModel", "User name is empty")
+            return false
+        }
+    }
+
 
     // EDIT PROFILE
 
@@ -231,17 +318,25 @@ class MainViewModel(
         _isEditProfile.value = !_isEditProfile.value
     }
 
-    fun updateUserNameData(){
-        Log.d("updateUserName", "Updating user name data with values: ${_firstNameForm.value}, ${_lastNameForm.value}")
+    fun updateUserNameData() {
+        Log.d(
+            "updateUserName",
+            "Updating user name data with values: ${_firstNameForm.value}, ${_lastNameForm.value}"
+        )
         _user.value.firstName = _firstNameForm.value
         _user.value.lastName = _lastNameForm.value
-        Log.d("updateUserName", "User name data updated with new values: ${_user.value.firstName}, ${_user.value.lastName}")
-        setStartDestination("profile")
+        Log.d(
+            "updateUserName",
+            "User name data updated with new values: ${_user.value.firstName}, ${_user.value.lastName}"
+        )
+
         CoroutineScope(Dispatchers.Main).launch {
             CommunicationManager.updateUser(_user.value)
             dataStoreManager.saveUser(_user.value)
         }
+        _userStatus.value = ""
     }
+
 
     // EDIT BILLING
 
@@ -282,9 +377,9 @@ class MainViewModel(
         _cardFullNameForm.value = value
     }
 
-    fun updateUserCardData(){
+    fun updateUserCardData() {
         Log.d(TAG, "Updating user card data with values: ${_user.value}")
-        if(validateCardField("cardFullName", _cardFullNameForm.value)) {
+        if (validateCardField("cardFullName", _cardFullNameForm.value)) {
             _user.value.cardFullName = _cardFullNameForm.value
         }
         if (validateCardField("cardNumber", _cardNumberForm.value)) {
@@ -305,6 +400,7 @@ class MainViewModel(
             CommunicationManager.updateUser(_user.value)
             dataStoreManager.saveUser(_user.value)
         }
+        _userStatus.value = ""
     }
 
 
@@ -344,29 +440,9 @@ class MainViewModel(
                     return false
                 } else return true
             }
+
             else -> return false
         }
-    }
-
-    //ORDER TRACK
-
-    private val _lastOid = MutableStateFlow<Int?>(null)
-    val lastOid: StateFlow<Int?> = _lastOid
-
-    private val _imageMenu = MutableStateFlow<MenuImage?>(null)
-    val imageMenu: StateFlow<MenuImage?> = _imageMenu
-
-    fun setImageMenu(mid: Int){
-        CoroutineScope(Dispatchers.Main).launch {
-            _imageMenu.value = databaseManager.getImageFromDatabase(mid)
-        }
-    }
-
-    fun setLastOid() {
-        CoroutineScope(Dispatchers.Main).launch {
-            _lastOid.value = CommunicationManager.getUser()?.lastOid
-        }
-
     }
 
 }

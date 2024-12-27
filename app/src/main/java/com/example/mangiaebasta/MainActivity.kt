@@ -1,6 +1,7 @@
 package com.example.mangiaebasta
 
 import android.content.Context
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -37,7 +38,6 @@ import com.example.mangiaebasta.datasource.DatastoreManager
 import com.example.mangiaebasta.datasource.LocationManager
 import com.example.mangiaebasta.loadingScreens.LocationPermissionDeniedScreen
 import com.example.mangiaebasta.loadingScreens.LocationPermissionScreen
-import com.example.mangiaebasta.loadingScreens.Root
 import com.example.mangiaebasta.loadingScreens.SplashScreen
 import com.example.mangiaebasta.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -56,9 +56,10 @@ class MainActivity : ComponentActivity() {
         val databaseManager = DatabaseManager(this)
         val dataStoreManager = DatastoreManager(dataStore)
         val locationManager = LocationManager(this)
+        val geocoder = Geocoder(this)
         val factory = viewModelFactory {
             initializer {
-                MainViewModel(databaseManager, dataStoreManager, locationManager)
+                MainViewModel(databaseManager, dataStoreManager, locationManager, geocoder)
             }
         }
         val mainViewModel: MainViewModel by viewModels() { factory }
@@ -112,27 +113,7 @@ fun MyApp(model: MainViewModel) {
                 }
             }
         } else {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment =  Alignment.CenterHorizontally
-            ){
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Descrizione immagine",
-                    modifier = Modifier.size(200.dp).padding(bottom = 16.dp)
-                )
-                Text(
-                    text = "Loading menus...",
-                    fontSize = 20.sp,
-                )
-                Column(
-                    modifier = Modifier.padding(30.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ){
-                    CircularProgressIndicator()
-                }
-            }
+            LoadingScreen("Initializing...")
         }
     }
 
