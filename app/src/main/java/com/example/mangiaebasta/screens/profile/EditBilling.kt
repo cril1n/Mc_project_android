@@ -27,7 +27,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.mangiaebasta.model.User
 import com.example.mangiaebasta.components.TopBarWithBackArrow
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
@@ -50,7 +49,7 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
 
 
     Column {
-        TopBarWithBackArrow("Profile edit", navController)
+        TopBarWithBackArrow("Billing edit", navController)
 
         Column(
             modifier = Modifier
@@ -72,29 +71,30 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
             ) {
                 Text("CARD NUMBER:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
                 if (isEditBilling) {
-                    TextField(
-                        value = cardNumberForm,
-                        onValueChange = { newValue ->
-                            if (newValue.matches(Regex("^\\d{0,16}$"))) {
-                                cardNumberForm = newValue
-                                if (newValue.length == 16) {
-                                    model.setCardNumberForm(newValue)
-                                    isCardNumberValid = true
+                    cardNumberForm?.let {
+                        TextField(
+                            value = it,
+                            onValueChange = { newValue ->
+                                if (newValue.matches(Regex("^\\d{0,16}$"))) {
+                                    cardNumberForm = newValue
+                                    if (newValue.length == 16) {
+                                        model.setCardNumberForm(newValue)
+                                        isCardNumberValid = true
+                                    } else isCardNumberValid = false
                                 }
-                                else isCardNumberValid = false
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        isError = !isCardNumberValid
-                    )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            isError = !isCardNumberValid
+                        )
+                    }
 
                     if (!isCardNumberValid) {
                         Text("Invalid card number", color = Color.Red)
                     }
                 } else {
-                    Text(user.cardNumber, modifier = Modifier.padding(bottom = 15.dp))
+                    user.cardNumber?.let { Text(it, modifier = Modifier.padding(bottom = 15.dp)) }
                 }
 
                 Text("EXPIRE MONTH:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
@@ -104,13 +104,15 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                         onValueChange = { newValue ->
                             // Accetta solo numeri e controlla che sia un mese valido
                             if (newValue.matches(Regex("^\\d{0,2}$"))) {
-                                val month = newValue.toIntOrNull() ?: 0
-                                if (month in 0..12) {  // Permette anche 0 durante la digitazione
-                                    expireMonthForm = newValue
-                                    model.setExpireMonthForm(newValue)
-                                    isExpireMonthValid = true
-                                }else{
-                                    isExpireMonthValid = false
+                                expireMonthForm = newValue
+                                if (newValue.length == 2) {
+                                    val month = newValue.toIntOrNull() ?: 0
+                                    if (month in 0..12) {  // Permette anche 0 durante la digitazione
+                                        model.setExpireMonthForm(newValue.toInt())
+                                        isExpireMonthValid = true
+                                    } else {
+                                        isExpireMonthValid = false
+                                    }
                                 }
                             }
                         },
@@ -122,20 +124,27 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                         Text("Invalid Month", color = Color.Red)
                     }
                 } else {
-                    Text(user.cardExpireMonth.toString(), modifier = Modifier.padding(bottom = 15.dp))
-                }
+                    Text(
+                        user.cardExpireMonth.toString(),
+                        modifier = Modifier.padding(bottom = 15.dp)
+                    )
 
-                Text("EXPIRE YEAR:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
+                }
+                Text(
+                    "EXPIRE YEAR:",
+                    softWrap = true,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
                 if (isEditBilling) {
                     TextField(
                         value = expireYearForm,
                         onValueChange = { newValue ->
                             if (newValue.matches(Regex("^\\d{0,2}$"))) {
                                 expireYearForm = newValue
-                                if(newValue.length == 2) {
-                                    model.setExpireYearForm(newValue)
+                                if (newValue.length == 2) {
+                                    model.setExpireYearForm(newValue.toInt())
                                     isExpireYearValid = true
-                                }else isExpireYearValid = false
+                                } else isExpireYearValid = false
 
                             }
                         },
@@ -147,56 +156,72 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                         Text("Invalid Year", color = Color.Red)
                     }
                 } else {
-                    Text(user.cardExpireYear.toString(), modifier = Modifier.padding(bottom = 15.dp))
+                    Text(
+                        user.cardExpireYear.toString(),
+                        modifier = Modifier.padding(bottom = 15.dp)
+                    )
                 }
 
                 Text("CVV:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
                 if (isEditBilling) {
-                    TextField(
-                        value = cvvForm,
-                        onValueChange = { newValue ->
-                            // Accetta solo numeri fino a 3 cifre
-                            if (newValue.matches(Regex("^\\d{0,3}$"))) {
-                                cvvForm = newValue
-                                if(newValue.length == 3) {
-                                    model.setCVVForm(newValue)
-                                    isCVVValid = true
-                                }else isCVVValid = false
+                    cvvForm?.let {
+                        TextField(
+                            value = it,
+                            onValueChange = { newValue ->
+                                // Accetta solo numeri fino a 3 cifre
+                                if (newValue.matches(Regex("^\\d{0,3}$"))) {
+                                    cvvForm = newValue
+                                    if (newValue.length == 3) {
+                                        model.setCVVForm(newValue)
+                                        isCVVValid = true
+                                    } else isCVVValid = false
 
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
                     if (!isCVVValid) {
                         Text("Invalid CVV", color = Color.Red)
                     }
                 } else {
-                    Text(user.cardCVV, modifier = Modifier.padding(bottom = 15.dp))
+                    user.cardCVV?.let { Text(it, modifier = Modifier.padding(bottom = 15.dp)) }
                 }
 
-                Text("CARDFULLNAME:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
+                Text(
+                    "CARDFULLNAME:",
+                    softWrap = true,
+                    modifier = Modifier.padding(bottom = 10.dp)
+                )
                 if (isEditBilling) {
-                    TextField(
-                        value = cardFullNameForm,
-                        onValueChange = { newValue ->
-                            // Accetta solo lettere e al massimo uno spazio
-                            if (newValue.matches(Regex("^[a-zA-Z]*(\\s[a-zA-Z]*)?$"))) {
-                                cardFullNameForm = newValue
-                                if(newValue.matches(Regex("^[a-zA-Z]+ [a-zA-Z]+$"))){
-                                    isCardFullNameValid = true
-                                    model.setCardFullNameForm(newValue)
-                                }else isCardFullNameValid = false
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
+                    cardFullNameForm?.let {
+                        TextField(
+                            value = it,
+                            onValueChange = { newValue ->
+                                // Accetta solo lettere e al massimo uno spazio
+                                if (newValue.matches(Regex("^[a-zA-Z]*(\\s[a-zA-Z]*)?$"))) {
+                                    cardFullNameForm = newValue
+                                    if (newValue.matches(Regex("^[a-zA-Z]+ [a-zA-Z]+$"))) {
+                                        isCardFullNameValid = true
+                                        model.setCardFullNameForm(newValue)
+                                    } else isCardFullNameValid = false
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
                     if (!isCardFullNameValid) {
                         Text("Invalid Card Full Name", color = Color.Red)
                     }
                 } else {
-                    Text(user.cardFullName, modifier = Modifier.padding(bottom = 15.dp))
+                    user.cardFullName?.let {
+                        Text(
+                            it,
+                            modifier = Modifier.padding(bottom = 15.dp)
+                        )
+                    }
                 }
             }
 

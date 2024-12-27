@@ -26,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.mangiaebasta.model.User
 import com.example.mangiaebasta.components.TopBarWithBackArrow
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
@@ -63,39 +62,43 @@ fun EditProfile(model: MainViewModel, navController: NavController) {
                 // Campo per il primo nome
                 Text("FIRST NAME:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
                 if (isEditProfile) {
-                    TextField(
-                        value = firstNameForm,
-                        onValueChange = { newValue ->
-                            // Validazione: accetta solo lettere senza spazi
-                            if (newValue.matches(Regex("^[a-zA-Z]*$"))) {
-                                firstNameForm = newValue
-                                model.setFirstNameForm(newValue)
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true // Impedisce l'inserimento di nuove linee
-                    )
+                    firstNameForm?.let {
+                        TextField(
+                            value = it,
+                            onValueChange = { newValue ->
+                                // Validazione: accetta solo lettere senza spazi
+                                if (newValue.matches(Regex("^[a-zA-Z]*$"))) {
+                                    firstNameForm = newValue
+                                    model.setFirstNameForm(newValue)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true // Impedisce l'inserimento di nuove linee
+                        )
+                    }
                 } else {
-                    Text(user.firstName, modifier = Modifier.padding(bottom = 15.dp))
+                    user.firstName?.let { Text(it, modifier = Modifier.padding(bottom = 15.dp)) }
                 }
 
                 // Campo per il cognome
                 Text("LAST NAME:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
                 if (isEditProfile) {
-                    TextField(
-                        value = lastNameForm,
-                        onValueChange = { newValue ->
-                            // Validazione: accetta solo lettere senza spazi
-                            if (newValue.matches(Regex("^[a-zA-Z]*$"))) {
-                                lastNameForm = newValue
-                                model.setLastNameForm(newValue)
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true // Impedisce l'inserimento di nuove linee
-                    )
+                    lastNameForm?.let {
+                        TextField(
+                            value = it,
+                            onValueChange = { newValue ->
+                                // Validazione: accetta solo lettere senza spazi
+                                if (newValue.matches(Regex("^[a-zA-Z]*$"))) {
+                                    lastNameForm = newValue
+                                    model.setLastNameForm(newValue)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true // Impedisce l'inserimento di nuove linee
+                        )
+                    }
                 } else {
-                    Text(user.lastName, modifier = Modifier.padding(bottom = 15.dp))
+                    user.lastName?.let { Text(it, modifier = Modifier.padding(bottom = 15.dp)) }
                 }
             }
 
@@ -111,15 +114,15 @@ fun EditProfile(model: MainViewModel, navController: NavController) {
                     onClick = {
                         if (isEditProfile) {
                             // Aggiorna i dati solo quando si preme Save
-                            model.setFirstNameForm(firstNameForm)
-                            model.setLastNameForm(lastNameForm)
+                            firstNameForm?.let { model.setFirstNameForm(it) }
+                            lastNameForm?.let { model.setLastNameForm(it) }
                             model.updateUserNameData()
                         }
                         model.switchEditMode()
                         Log.d("FORM", "New firstname: $firstNameForm, new lastname: $lastNameForm")
                     },
                     // Disabilita il pulsante Save se i campi sono vuoti
-                    enabled = !isEditProfile || (firstNameForm.isNotBlank() && lastNameForm.isNotBlank())
+                    enabled = !isEditProfile || (firstNameForm!!.isNotBlank() && lastNameForm!!.isNotBlank())
                 ) {
                     if (isEditProfile) {
                         Text("SAVE")

@@ -17,12 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mangiaebasta.R
-import com.example.mangiaebasta.model.User
+import com.example.mangiaebasta.model.GetUserResponse
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @Composable
@@ -72,9 +67,9 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ProfileInfo(user, navController)
-                ProfileBillingInfo(user, navController)
-                LastOrderInfo(user, navController)
+                ProfileInfo(navController)
+                ProfileBillingInfo(navController)
+                LastOrderInfo(navController)
             }
         }
 
@@ -120,7 +115,7 @@ fun ProfileHeader() {
 }
 
 @Composable
-fun ImageWithText(user: User) {
+fun ImageWithText(user: GetUserResponse) {
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -138,7 +133,7 @@ fun ImageWithText(user: User) {
 }
 
 @Composable
-fun ProfileInfo(user: User, navController: NavController) {
+fun ProfileInfo(navController: NavController) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -152,7 +147,7 @@ fun ProfileInfo(user: User, navController: NavController) {
 }
 
 @Composable
-fun ProfileBillingInfo(user: User, navController: NavController) {
+fun ProfileBillingInfo(navController: NavController) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -164,7 +159,7 @@ fun ProfileBillingInfo(user: User, navController: NavController) {
 }
 
 @Composable
-fun LastOrderInfo(user: User, navController: NavController) {
+fun LastOrderInfo(navController: NavController) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center

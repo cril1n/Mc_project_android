@@ -8,17 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.serialization.SerialName
 
 
-data class User(
-    var firstName: String,
-    var lastName: String,
-    var cardFullName: String,
-    var cardNumber: String,
-    var cardExpireMonth: Int,
-    var cardExpireYear: Int,
-    var cardCVV: String,
-    var lastOid: Int,
-    val orderStatus: String
-)
 
 @Serializable
 data class CreateUserResponse(
@@ -28,15 +17,15 @@ data class CreateUserResponse(
 
 @Serializable
 data class GetUserResponse(
-    val firstName: String?,
-    val lastName: String?,
-    val cardFullName: String?,
-    val cardNumber: String?,
-    val cardExpireMonth: Int?,
-    val cardExpireYear: Int?,
-    val cardCVV: String?,
+    var firstName: String?,
+    var lastName: String?,
+    var cardFullName: String?,
+    var cardNumber: String?,
+    var cardExpireMonth: Int?,
+    var cardExpireYear: Int?,
+    var cardCVV: String?,
     val uid: Int?,
-    val lastOid: Int?,
+    var lastOid: Int?,
     val orderStatus: String?
 )
 

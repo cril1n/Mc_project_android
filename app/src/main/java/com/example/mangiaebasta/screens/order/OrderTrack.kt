@@ -36,11 +36,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Composable
-fun OrderTrack(model: MainViewModel, navController: NavController, menuDetailed: String) {
+fun OrderTrack(model: MainViewModel, navController: NavController, menuString: String) {
 
-
-
-    //if(lastOid.value == null) NoOrderTrack()
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
 
     LaunchedEffect(currentBackStackEntry.value) {
@@ -69,7 +66,7 @@ fun OrderTrack(model: MainViewModel, navController: NavController, menuDetailed:
 
 
             if (orderOnDelivery.value != null) {
-                OrderDetail(orderOnDelivery.value!!, menuDetailed)
+                OrderDetail(orderOnDelivery.value!!, menuString)
                 Spacer(modifier = Modifier.height(12.dp))
                 OrderMap(orderOnDelivery.value!!, initialRegion.value)
             } else {

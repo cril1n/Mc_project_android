@@ -11,10 +11,12 @@ import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.example.mangiaebasta.datasource.CommunicationManager
 import com.example.mangiaebasta.datasource.DatabaseManager
 import com.example.mangiaebasta.datasource.DatastoreManager
 import com.example.mangiaebasta.datasource.LocationManager
+import com.example.mangiaebasta.model.GetUserResponse
 import com.example.mangiaebasta.model.InitialRegion
 import com.example.mangiaebasta.model.LocationData
 import com.example.mangiaebasta.model.MenuDetailed
@@ -22,13 +24,14 @@ import com.example.mangiaebasta.model.MenuWImage
 import com.example.mangiaebasta.model.OrderResponse
 import com.example.mangiaebasta.model.OrderResponseCompleted
 import com.example.mangiaebasta.model.OrderResponseOnDelivery
-import com.example.mangiaebasta.model.User
 import com.example.mangiaebasta.repositories.ImageRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.abs
 
@@ -194,34 +197,19 @@ class MainViewModel(
 
     //USER
 
-    private val _user = MutableStateFlow<User>(User("", "", "", "", 0, 0, "", 0, "" ))
-    val user: StateFlow<User> = _user
+    private val _user = MutableStateFlow<GetUserResponse>(GetUserResponse(null, null, null, null, null, null, null, null, null, null))
+    val user: StateFlow<GetUserResponse> = _user
 
     //RECUPERO USER DAL DATASTORE
     init {
         viewModelScope.launch {
             dataStoreManager.getUser().collect {
-                Log.d(TAG, "User from datastore: $it")
+                Log.d(TAG, "GetUserResponse from datastore: $it")
                 _user.value = it
             }
         }
     }
 
-    fun setUserData(user: User) {
-        _user.value = user
-    }
-
-    fun setUserDataField(field: String, value: String) {
-        when (field) {
-            "firstName" -> _user.value.firstName = value
-            "lastName" -> _user.value.lastName = value
-            "cardFullName" -> _user.value.cardFullName = value
-            "cardNumber" -> _user.value.cardNumber = value
-            "cardExpireMonth" -> _user.value.cardExpireMonth = value.toInt()
-            "cardExpireYear" -> _user.value.cardExpireYear = value.toInt()
-            "cardCVV" -> _user.value.cardCVV = value
-        }
-    }
 
     suspend fun createNewUser() {
         Log.d(TAG, "Creating new user")
@@ -232,7 +220,7 @@ class MainViewModel(
             dataStoreManager.setUidInDataStore(uid)
             Log.d(TAG, "New user create, sid: $sid, uid: $uid")
             _firstRun.value = false
-            _user.value = User("", "", "", "", 0, 0, "", 0, "" )
+            _user.value = GetUserResponse(null, null, null, null, null, null, null, uid, null, null)
         } catch (e: Exception) {
             Log.e(TAG, "Error in createNewUser: $e")
         }
@@ -241,29 +229,17 @@ class MainViewModel(
 
     //ORDER
 
-    private val _lastOrder = MutableStateFlow<OrderResponseCompleted?>(null)
-    val lastOrder: StateFlow<OrderResponseCompleted?> = _lastOrder
-
-    private val _orderID = MutableStateFlow<Int?>(null)
-    val orderID: StateFlow<Int?> = _orderID
-
-    fun setOrderID(value: Int) {
-        _orderID.value = value
-    }
-
-    fun setlastOrder(value: OrderResponseCompleted) {
-        _lastOrder.value = value
-    }
 
     private val _orderOnDelivery = MutableStateFlow<OrderResponseOnDelivery?>(null)
-   // private val _orderOnDelivery = MutableStateFlow<OrderResponseOnDelivery?>(OrderResponseOnDelivery(1, 1, 37409, "2024-12-26T16:24:14.964Z", "2024-12-26T16:24:14.964Z", "ON_DELIVERY", LocationData(45.4642, 9.19 ), LocationData(45.47, 9.20)))
+
+    // private val _orderOnDelivery = MutableStateFlow<OrderResponseOnDelivery?>(OrderResponseOnDelivery(1, 1, 37409, "2024-12-26T16:24:14.964Z", "2024-12-26T16:24:14.964Z", "ON_DELIVERY", LocationData(45.4642, 9.19 ), LocationData(45.47, 9.20)))
     val orderOnDelivery: StateFlow<OrderResponseOnDelivery?> = _orderOnDelivery
 
     fun setOrderOnDelivery() {
         var value: OrderResponseOnDelivery? = null
         CoroutineScope(Dispatchers.Main).launch {
-            _orderID.value?.let {
-                value = CommunicationManager.getOrderInfo(it) as OrderResponseOnDelivery?
+            _orderOnDelivery.value?.let {
+                value = CommunicationManager.getOrderInfo(it.oid) as OrderResponseOnDelivery?
             }
         }
         _orderOnDelivery.value = value
@@ -276,14 +252,19 @@ class MainViewModel(
         _orderOnFocus.value = value
     }
 
-    private val _initialRegion = MutableStateFlow(InitialRegion(LocationData(null, null), null, null))
+    private val _initialRegion =
+        MutableStateFlow(InitialRegion(LocationData(null, null), null, null))
     val initialRegion: StateFlow<InitialRegion> = _initialRegion
 
     fun setInitialRegion(orderData: OrderResponse) {
-        initialRegion.value.center.lat = (orderData.currentPosition.lat?.plus(orderData.deliveryLocation.lat!!))?.div(2)
-        initialRegion.value.center.lng = (orderData.currentPosition.lng?.plus(orderData.deliveryLocation.lng!!))?.div(2)
-        initialRegion.value.deltaX = abs(orderData.currentPosition.lat!! - orderData.deliveryLocation.lat!!)
-        initialRegion.value.deltaY = abs(orderData.currentPosition.lng!! - orderData.deliveryLocation.lng!!)
+        initialRegion.value.center.lat =
+            (orderData.currentPosition.lat?.plus(orderData.deliveryLocation.lat!!))?.div(2)
+        initialRegion.value.center.lng =
+            (orderData.currentPosition.lng?.plus(orderData.deliveryLocation.lng!!))?.div(2)
+        initialRegion.value.deltaX =
+            abs(orderData.currentPosition.lat!! - orderData.deliveryLocation.lat!!)
+        initialRegion.value.deltaY =
+            abs(orderData.currentPosition.lng!! - orderData.deliveryLocation.lng!!)
     }
 
 
@@ -296,13 +277,17 @@ class MainViewModel(
     var showDialog: MutableStateFlow<Boolean> = _showDialog
 
     fun setShowDialog() {
-        if(_userStatus.value != "") _showDialog.value = true
+        if (_userStatus.value != "") _showDialog.value = true
         else _showDialog.value = false
     }
+
     fun setShowDialog(value: Boolean) {
         _showDialog.value = value
     }
-    fun sendOrder(mid: Int) {
+
+    fun sendOrder(mid: Int, navController: NavHostController, menuString: String) {
+        Log.d("MainViewModel", "Sending order")
+        Log.d("MainViewModel", "GetUserResponse: ${Json.encodeToString(_user.value)}")
         if (_user.value.firstName == "" || user.value.lastName == "") {
             _userStatus.value = "missingInfo"
             return
@@ -318,36 +303,43 @@ class MainViewModel(
             _userStatus.value = "onDelivery"
             return
         }
-        var orderResponse: OrderResponse? = null
-        CoroutineScope(Dispatchers.Main).launch {
-            orderResponse = CommunicationManager.sendOrder(mid, location.value!!.latitude, location.value!!.longitude)
+
+        try {
+            var orderResponse: OrderResponse? = null
+            CoroutineScope(Dispatchers.Main).launch {
+                orderResponse = CommunicationManager.sendOrder(
+                    mid,
+                    location.value!!.latitude,
+                    location.value!!.longitude
+                )
+            }
+
+            orderResponse?.let {
+                _user.value.lastOid = it.oid
+                setInitialRegion(it)
+            }
+
+            setOrderOnDelivery()
+            _userStatus.value = ""
+
+            navController.navigate("orderTrack/${menuString}")
+        } catch (e: Exception) {
+            Log.e("MainViewModel", "Error in sendOrder: $e")
         }
-        orderResponse?.let {
-            setOrderID(it.oid)
-            _user.value.lastOid = it.oid
-            setInitialRegion(it)
-        }
-        setOrderOnDelivery()
-
-        _userStatus.value = ""
-
-        _showDialog.value = false
-
     }
 
 
     //ORDER TRACK
 
 
-
     //PROFILE
 
-    fun isUserRegistered() : Boolean {
-        if (user.value.firstName.isNotEmpty() || user.value.lastName.isNotEmpty()) {
-            Log.d("MainViewModel", "User name is not empty")
+    fun isUserRegistered(): Boolean {
+        if (user.value.firstName?.isNotEmpty() == true || user.value.lastName?.isNotEmpty() == true) {
+            Log.d("MainViewModel", "GetUserResponse name is not empty")
             return true
         } else {
-            Log.d("MainViewModel", "User name is empty")
+            Log.d("MainViewModel", "GetUserResponse name is empty")
             return false
         }
     }
@@ -358,9 +350,9 @@ class MainViewModel(
     private val _isEditProfile = MutableStateFlow(false)
     val isEditProfile: StateFlow<Boolean> = _isEditProfile
     private val _firstNameForm = MutableStateFlow(_user.value.firstName)
-    val firstNameForm: StateFlow<String> = _firstNameForm
+    val firstNameForm: MutableStateFlow<String?> = _firstNameForm
     private val _lastNameForm = MutableStateFlow(_user.value.lastName)
-    val lastNameForm: StateFlow<String> = _lastNameForm
+    val lastNameForm: MutableStateFlow<String?> = _lastNameForm
 
     fun setFirstNameForm(value: String) {
         _firstNameForm.value = value
@@ -383,7 +375,7 @@ class MainViewModel(
         _user.value.lastName = _lastNameForm.value
         Log.d(
             "updateUserName",
-            "User name data updated with new values: ${_user.value.firstName}, ${_user.value.lastName}"
+            "GetUserResponse name data updated with new values: ${_user.value.firstName}, ${_user.value.lastName}"
         )
 
         CoroutineScope(Dispatchers.Main).launch {
@@ -400,15 +392,15 @@ class MainViewModel(
     private val _isEditBilling = MutableStateFlow(false)
     val isEditBilling: StateFlow<Boolean> = _isEditBilling
     private val _cardNumberForm = MutableStateFlow(_user.value.cardNumber)
-    val cardNumberForm: StateFlow<String> = _cardNumberForm
-    private val _expireMonthForm = MutableStateFlow(_user.value.cardExpireMonth.toString())
-    val expireMonthForm: StateFlow<String> = _expireMonthForm
-    private val _expireYearForm = MutableStateFlow(_user.value.cardExpireYear.toString())
-    val expireYearForm: StateFlow<String> = _expireYearForm
+    val cardNumberForm: MutableStateFlow<String?> = _cardNumberForm
+    private val _expireMonthForm = MutableStateFlow(_user.value.cardExpireMonth)
+    val expireMonthForm: MutableStateFlow<Int?> = _expireMonthForm
+    private val _expireYearForm = MutableStateFlow(_user.value.cardExpireYear)
+    val expireYearForm: MutableStateFlow<Int?> = _expireYearForm
     private val _cvvForm = MutableStateFlow(_user.value.cardCVV)
-    val cvvForm: StateFlow<String> = _cvvForm
+    val cvvForm: MutableStateFlow<String?> = _cvvForm
     private val _cardFullNameForm = MutableStateFlow(_user.value.cardFullName)
-    val cardFullNameForm: StateFlow<String> = _cardFullNameForm
+    val cardFullNameForm: MutableStateFlow<String?> = _cardFullNameForm
 
     fun switchEditBillingMode() {
         _isEditBilling.value = !_isEditBilling.value
@@ -418,11 +410,11 @@ class MainViewModel(
         _cardNumberForm.value = value
     }
 
-    fun setExpireMonthForm(value: String) {
+    fun setExpireMonthForm(value: Int) {
         _expireMonthForm.value = value
     }
 
-    fun setExpireYearForm(value: String) {
+    fun setExpireYearForm(value: Int) {
         _expireYearForm.value = value
     }
 
@@ -436,23 +428,23 @@ class MainViewModel(
 
     fun updateUserCardData() {
         Log.d(TAG, "Updating user card data with values: ${_user.value}")
-        if (validateCardField("cardFullName", _cardFullNameForm.value)) {
+        if (_cardFullNameForm.value?.let { validateCardField("cardFullName", it) } == true) {
             _user.value.cardFullName = _cardFullNameForm.value
         }
-        if (validateCardField("cardNumber", _cardNumberForm.value)) {
+        if (_cardNumberForm.value?.let { validateCardField("cardNumber", it) } == true) {
             _user.value.cardNumber = _cardNumberForm.value
         }
-        if (validateCardField("expireMonth", _expireMonthForm.value)) {
-            _user.value.cardExpireMonth = _expireMonthForm.value.toInt()
+        if (validateCardField("expireMonth", _expireMonthForm.value.toString())) {
+            _user.value.cardExpireMonth = _expireMonthForm.value
         }
 
-        if (validateCardField("expireYear", _expireYearForm.value)) {
-            _user.value.cardExpireYear = _expireYearForm.value.toInt()
+        if (validateCardField("expireYear", _expireYearForm.value.toString())) {
+            _user.value.cardExpireYear = _expireYearForm.value
         }
-        if (validateCardField("CVV", _cvvForm.value)) {
+        if (_cvvForm.value?.let { validateCardField("CVV", it) } == true) {
             _user.value.cardCVV = _cvvForm.value
         }
-        Log.d(TAG, "User card data updated with new values: ${_user.value}")
+        Log.d(TAG, "GetUserResponse card data updated with new values: ${_user.value}")
         CoroutineScope(Dispatchers.Main).launch {
             CommunicationManager.updateUser(_user.value)
             dataStoreManager.saveUser(_user.value)

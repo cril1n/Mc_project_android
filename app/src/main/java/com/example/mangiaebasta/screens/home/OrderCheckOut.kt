@@ -99,10 +99,8 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
             Button(
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
-
-                        menu?.mid?.let { model.sendOrder(it) }
+                        menu?.mid?.let { model.sendOrder(it, navController, menuString) }
                         model.setShowDialog()
-                        navController.navigate("orderTrack/${menuString}")
                     }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)

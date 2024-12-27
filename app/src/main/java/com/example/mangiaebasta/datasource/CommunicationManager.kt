@@ -13,7 +13,6 @@ import com.example.mangiaebasta.model.OrderResponseCompleted
 import com.example.mangiaebasta.model.OrderResponseOnDelivery
 import com.example.mangiaebasta.model.SendOrderRequest
 import com.example.mangiaebasta.model.UpdateUserRequest
-import com.example.mangiaebasta.model.User
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
@@ -77,6 +76,7 @@ object CommunicationManager {
                 contentType(ContentType.Application.Json)
                 setBody(requestBody)
             }
+
         }
         val result: HttpResponse
         try {
@@ -133,18 +133,19 @@ object CommunicationManager {
         return null
     }
 
-    suspend fun updateUser(user: User): String {
+    suspend fun updateUser(user: GetUserResponse): String {
         Log.d(TAG, "updateUser")
         if (sid != null && uid != null) {
             val url = "$BASE_URL/user/$uid"
+            Log.d(TAG, "url: $url")
             val requestBody = UpdateUserRequest(
                 firstName = user.firstName,
                 lastName = user.lastName,
-                cardFullName = if(user.cardFullName == "") null else user.cardFullName,
-                cardNumber = if(user.cardNumber == "") null else user.cardNumber,
-                cardExpireMonth = if(user.cardExpireMonth == 0) null else user.cardExpireMonth,
-                cardExpireYear = if(user.cardExpireYear == 0) null else user.cardExpireYear,
-                cardCVV = if(user.cardCVV == "") null else user.cardCVV,
+                cardFullName =  user.cardFullName,
+                cardNumber =  user.cardNumber,
+                cardExpireMonth =  user.cardExpireMonth,
+                cardExpireYear =  user.cardExpireYear,
+                cardCVV =  user.cardCVV,
                 sid = sid
             )
             Log.d(TAG, "Request body: $requestBody")
@@ -159,21 +160,30 @@ object CommunicationManager {
     }
 
     suspend fun sendOrder(mid: Int, latitude: Double, longitude: Double): OrderResponse? {
+
+
         Log.d(TAG, "sendOrder")
-        if (sid != null && uid != null) {
-            val url = "$BASE_URL/menu/${mid}/buy"
-            val locationData = LocationData(latitude, longitude)
-            val requestBody = SendOrderRequest(
-                sid = sid!!,
-                deliveryLocation = locationData
-            )
-            val httpResponse = genericRequest(url, HttpMethod.POST, requestBody = requestBody)
-            Log.d(TAG, "Response: $httpResponse")
-            val result: OrderResponse = httpResponse.body()
-            Log.d(TAG, "Deserialized response: $result")
-            return result
+
+        Log.d(TAG, "$mid, $sid, $uid")
+        try {
+            if (sid != null && uid != null) {
+                val url = "$BASE_URL/menu/${mid}/buy"
+                val locationData = LocationData(latitude, longitude)
+                val requestBody = SendOrderRequest(
+                    sid = sid!!,
+                    deliveryLocation = locationData
+                )
+                val httpResponse = genericRequest(url, HttpMethod.POST, requestBody = requestBody)
+                Log.d(TAG, "Response: $httpResponse")
+                val result: OrderResponse = httpResponse.body()
+                Log.d(TAG, "Deserialized response: $result")
+                return result
+            }
+            Log.d(TAG, "sid or uid are null, create a user before")
+            return null
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in sendOrder: $e")
         }
-        Log.d(TAG, "sid or uid are null, create a user before")
         return null
     }
 
