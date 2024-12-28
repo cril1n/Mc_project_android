@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.mangiaebasta.model.GetUserResponse
+import com.example.mangiaebasta.model.MenuDetailed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -99,38 +100,63 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
         val LAST_OID = intPreferencesKey("last_oid")
         val ORDER_STATUS = stringPreferencesKey("order_status")
         val UID = intPreferencesKey("uid")
+        val MID = intPreferencesKey("mid")
     }
 
+
+    suspend fun saveMenuOrdered ( mid : Int) {
+        Log.d("StorageManager", "Saving menu ordered: $mid")
+        try{
+            dataStore.edit { preferences ->
+                preferences[PreferencesKeys.MID] = mid
+            }
+        }catch (e: Exception){
+            Log.d("StorageManager", "Error saving menu ordered: $e")
+        }
+    }
+
+    suspend fun getMenuOrdered(): Int? {
+        Log.d("StorageManager", "Getting menu ordered from data store")
+        return withContext(Dispatchers.IO) {
+            val preferences = dataStore.data.first()
+            preferences[PreferencesKeys.MID]
+        }
+    }
     suspend fun saveUser( user: GetUserResponse) {
         Log.d("StorageManager", "Saving user: $user")
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.FIRST_NAME] = user.firstName!!
-            preferences[PreferencesKeys.LAST_NAME] = user.lastName!!
-            preferences[PreferencesKeys.CARD_FULL_NAME] = user.cardFullName!!
-            preferences[PreferencesKeys.CARD_NUMBER] = user.cardNumber!!
-            preferences[PreferencesKeys.CARD_EXPIRE_MONTH] = user.cardExpireMonth!!
-            preferences[PreferencesKeys.CARD_EXPIRE_YEAR] = user.cardExpireYear!!
-            preferences[PreferencesKeys.CARD_CVV] = user.cardCVV!!
-            preferences[PreferencesKeys.LAST_OID] = user.lastOid!!
-            preferences[PreferencesKeys.ORDER_STATUS] = user.orderStatus!!
-            preferences[PreferencesKeys.UID] = user.uid!!
-
+        try{
+            dataStore.edit { preferences ->
+                user.firstName?.let { preferences[PreferencesKeys.FIRST_NAME] = user.firstName!! }
+                user.lastName?.let { preferences[PreferencesKeys.LAST_NAME] = user.lastName!! }
+                user.cardFullName?.let { preferences[PreferencesKeys.CARD_FULL_NAME] = user.cardFullName!! }
+                user.cardNumber?.let { preferences[PreferencesKeys.CARD_NUMBER] = user.cardNumber!! }
+                user.cardExpireMonth?.let { preferences[PreferencesKeys.CARD_EXPIRE_MONTH] = user.cardExpireMonth!! }
+                user.cardExpireYear?.let { preferences[PreferencesKeys.CARD_EXPIRE_YEAR] = user.cardExpireYear!! }
+                user.cardCVV?.let { preferences[PreferencesKeys.CARD_CVV] = user.cardCVV!! }
+                user.lastOid?.let { preferences[PreferencesKeys.LAST_OID] = user.lastOid!! }
+                user.orderStatus?.let { preferences[PreferencesKeys.ORDER_STATUS] = user.orderStatus!!
+                }
+                user.uid?.let { preferences[PreferencesKeys.UID] = it }
+            }
+        }catch(e: Exception){
+            Log.d("StorageManager", "Error saving user: $e")
         }
+
     }
 
     fun getUser(): Flow<GetUserResponse> {
         return dataStore.data.map { preferences ->
             GetUserResponse(
-                firstName = preferences[PreferencesKeys.FIRST_NAME] ?: "",
-                lastName = preferences[PreferencesKeys.LAST_NAME] ?: "",
-                cardFullName = preferences[PreferencesKeys.CARD_FULL_NAME] ?: "",
-                cardNumber = preferences[PreferencesKeys.CARD_NUMBER] ?: "",
-                cardExpireMonth = preferences[PreferencesKeys.CARD_EXPIRE_MONTH]?.toInt() ?: 0,
-                cardExpireYear = preferences[PreferencesKeys.CARD_EXPIRE_YEAR]?.toInt() ?: 0,
-                cardCVV = preferences[PreferencesKeys.CARD_CVV] ?: "",
-                lastOid = preferences[PreferencesKeys.LAST_OID]?.toInt() ?: 0,
-                orderStatus = preferences[PreferencesKeys.ORDER_STATUS] ?: "",
-                uid = preferences[PreferencesKeys.UID]?.toInt() ?: 0,
+                firstName = preferences[PreferencesKeys.FIRST_NAME],
+                lastName = preferences[PreferencesKeys.LAST_NAME],
+                cardFullName = preferences[PreferencesKeys.CARD_FULL_NAME],
+                cardNumber = preferences[PreferencesKeys.CARD_NUMBER],
+                cardExpireMonth = preferences[PreferencesKeys.CARD_EXPIRE_MONTH]?.toInt(),
+                cardExpireYear = preferences[PreferencesKeys.CARD_EXPIRE_YEAR]?.toInt(),
+                cardCVV = preferences[PreferencesKeys.CARD_CVV],
+                lastOid = preferences[PreferencesKeys.LAST_OID]?.toInt(),
+                orderStatus = preferences[PreferencesKeys.ORDER_STATUS],
+                uid = preferences[PreferencesKeys.UID]?.toInt(),
             )
         }
     }

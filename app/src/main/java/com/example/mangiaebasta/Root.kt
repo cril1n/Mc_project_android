@@ -75,9 +75,9 @@ fun Root(model: MainViewModel) {
                         )
                     },
                     label = { Text("Order Track") },
-                    selected = currentDestination?.route == "orderTrack/{menuString}",
+                    selected = currentDestination?.route == "orderTrack",  // Modificato
                     onClick = {
-                        navController.navigate("orderTrack/{menuString}") {
+                        navController.navigate("orderTrack") {  // Modificato
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = false
                             }
@@ -107,37 +107,36 @@ fun Root(model: MainViewModel) {
                     }
                 )
             }
-
         }
     ) { innerPadding ->
         NavHost(navController, startDestination = "home_stack", Modifier.padding(innerPadding)) {
 
             navigation(startDestination = "homeScreen", route = "home_stack") {
                 composable("homeScreen") { HomeScreen(model, navController) }
+
                 composable(
                     "menuDetail/{mid}",
                     arguments = listOf(
-                        navArgument("mid") { type = NavType.IntType }),
+                        navArgument("mid") { type = NavType.IntType }
+                    ),
                 ) { backStackEntry ->
                     val mid = backStackEntry.arguments?.getInt("mid")
                     MenuDetail(mid!!, navController, model)
                 }
+
                 composable(
                     "orderCheckOut/{menuString}",
                     arguments = listOf(
-                        navArgument("menuString") { type = NavType.StringType }),
+                        navArgument("menuString") { type = NavType.StringType }
+                    ),
                 ) { backStackEntry ->
                     val menuString = backStackEntry.arguments?.getString("menuString")
                     OrderCheckOut(menuString!!, navController, model)
                 }
             }
 
-            composable("orderTrack/{menuString}",
-                arguments = listOf(
-                    navArgument("menuString") { type = NavType.StringType }),
-            ) { backStackEntry ->
-                val menuString = backStackEntry.arguments?.getString("menuString")
-                OrderTrack(model, navController, menuString!!)
+            composable("orderTrack") {  // Rimosso menuString solo da orderTrack
+                OrderTrack(model, navController)
             }
 
             navigation(startDestination = "profileScreen", route = "profile_stack") {

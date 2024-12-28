@@ -26,7 +26,7 @@ data class GetUserResponse(
     var cardCVV: String?,
     val uid: Int?,
     var lastOid: Int?,
-    val orderStatus: String?
+    var orderStatus: String?
 )
 
 @Serializable
@@ -47,6 +47,7 @@ data class LocationData(
     var lng: Double?
 )
 
+@Serializable
 data class InitialRegion(
     val center: LocationData,
     var deltaY: Double?,
@@ -74,10 +75,10 @@ data class OrderResponseOnDelivery(
     val mid: Int,
     val uid: Int,
     val creationTimestamp: String,
-    val expectedDeliveryTimestamp: String,
     val status: String,
     val deliveryLocation: LocationData,
-    val currentPosition: LocationData
+    val currentPosition: LocationData,
+    val expectedDeliveryTimestamp: String,
 )
 
 @Serializable

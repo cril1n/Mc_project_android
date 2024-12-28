@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.mangiaebasta.R
@@ -23,6 +25,8 @@ import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.generated.PointAnnotation
+import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
+import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotationState
 import com.mapbox.maps.extension.compose.annotation.rememberIconImage
 import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
 import com.mapbox.maps.plugin.locationcomponent.location
@@ -56,7 +60,14 @@ fun OrderMap(orderData: OrderResponseOnDelivery, initialRegion: InitialRegion) {
             // Configura le opzioni della camera
             setCameraOptions {
                 center(Point.fromLngLat(centerLng, centerLat)) // Centro della mappa
-                zoom(calculateZoomLevel(minLat, maxLat, minLng, maxLng)) // Calcolo del livello di zoom
+                zoom(
+                    calculateZoomLevel(
+                        minLat,
+                        maxLat,
+                        minLng,
+                        maxLng
+                    )
+                ) // Calcolo del livello di zoom
                 pitch(0.0)
             }
         }
@@ -68,13 +79,10 @@ fun OrderMap(orderData: OrderResponseOnDelivery, initialRegion: InitialRegion) {
                 .fillMaxWidth(),
             mapViewportState = mapViewportState
         ) {
-
-
             // Disabilita il puck di default
             MapEffect(Unit) { mapView ->
                 mapView.mapboxMap.loadStyle("mapbox://styles/guerine/cm4sjsro8000201s7hg2t66un")
                 mapView.location.updateSettings {
-
                     locationPuck = createDefault2DPuck(withBearing = false).apply {
                         bearingImage = null
                         shadowImage = null
@@ -82,22 +90,31 @@ fun OrderMap(orderData: OrderResponseOnDelivery, initialRegion: InitialRegion) {
                     }
                     enabled = false
                 }
-
             }
-
-
+            val userLocation = Point.fromLngLat(
+                orderData.deliveryLocation.lng!!,
+                orderData.deliveryLocation.lat!!
+            )
+            val droneLocation = Point.fromLngLat(
+                orderData.currentPosition.lng!!,
+                orderData.currentPosition.lat!!
+            )
+            PolylineAnnotation(
+                points = listOf(userLocation, droneLocation),
+                polylineAnnotationState = remember {
+                    PolylineAnnotationState().apply {
+                        this.lineColor = Color(0xFFFFA500) // Arancione
+                        this.lineWidth = 4.0      // Spessore della linea
+                    }
+                }
+            )
             // Aggiungi l'icona personalizzata nella posizione corrente
             val userMarker = rememberIconImage(
                 key = R.drawable.homeicon,
                 painter = painterResource(R.drawable.homeicon)
             )
 
-            PointAnnotation(
-                point = Point.fromLngLat(
-                    orderData.deliveryLocation.lng!!,
-                    orderData.deliveryLocation.lat!!
-                )
-            ) {
+            PointAnnotation(point = userLocation) {
                 iconImage = userMarker
                 iconSize = 0.2
                 iconOpacity = 3.0
@@ -108,25 +125,14 @@ fun OrderMap(orderData: OrderResponseOnDelivery, initialRegion: InitialRegion) {
                 painter = painterResource(R.drawable.drone)
             )
 
-
-            PointAnnotation(
-                point = Point.fromLngLat(
-                    orderData.currentPosition.lng!!,
-                    orderData.currentPosition.lat!!
-                )
-            ) {
+            PointAnnotation(point = droneLocation) {
                 iconImage = droneMarker
                 iconSize = 0.2
                 iconOpacity = 3.0
             }
-
-
         }
-
     }
-
 }
-
 
 // Funzione per calcolare il livello di zoom basato sui limiti
 fun calculateZoomLevel(minLat: Double, maxLat: Double, minLng: Double, maxLng: Double): Double {

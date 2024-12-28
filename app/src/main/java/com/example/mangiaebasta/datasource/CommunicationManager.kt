@@ -128,8 +128,7 @@ object CommunicationManager {
             val result: GetUserResponse = httpResponse.body()
             Log.d(TAG, "Deserialized response: $result")
             return result
-        }
-        Log.d(TAG, "sid or uid are null, create a user before")
+        }else Log.d(TAG, "sid or uid are null, create a user before")
         return null
     }
 
@@ -138,6 +137,7 @@ object CommunicationManager {
         if (sid != null && uid != null) {
             val url = "$BASE_URL/user/$uid"
             Log.d(TAG, "url: $url")
+            Log.d(TAG, "user: $user & sid: $sid")
             val requestBody = UpdateUserRequest(
                 firstName = user.firstName,
                 lastName = user.lastName,
@@ -154,17 +154,13 @@ object CommunicationManager {
                 Log.d(TAG, "User updated")
                 return "User updated"
             }
-        }
-        Log.d(TAG, "sid or uid are null, create a user before")
+        }else Log.d(TAG, "sid or uid are null, create a user before")
         return "Something went wrong"
     }
 
-    suspend fun sendOrder(mid: Int, latitude: Double, longitude: Double): OrderResponse? {
-
-
+    suspend fun sendOrder(mid: Int, latitude: Double, longitude: Double): OrderResponseOnDelivery? {
         Log.d(TAG, "sendOrder")
-
-        Log.d(TAG, "$mid, $sid, $uid")
+        Log.d(TAG, "Mid: $mid, Sid: $sid, Uid: $uid")
         try {
             if (sid != null && uid != null) {
                 val url = "$BASE_URL/menu/${mid}/buy"
@@ -173,11 +169,17 @@ object CommunicationManager {
                     sid = sid!!,
                     deliveryLocation = locationData
                 )
+                Log.d(TAG, "Request body: ${Json.encodeToString(requestBody)}")
                 val httpResponse = genericRequest(url, HttpMethod.POST, requestBody = requestBody)
                 Log.d(TAG, "Response: $httpResponse")
-                val result: OrderResponse = httpResponse.body()
+                if(httpResponse.status.value !in 200..299) {
+                    Log.d(TAG, "Error during order creation")
+                    return null
+                }
+                val result: OrderResponseOnDelivery = httpResponse.body()
                 Log.d(TAG, "Deserialized response: $result")
                 return result
+
             }
             Log.d(TAG, "sid or uid are null, create a user before")
             return null
@@ -193,17 +195,18 @@ object CommunicationManager {
             val url = "$BASE_URL/order/$oid"
             val queryParameters = mapOf("sid" to sid)
             val httpResponse = genericRequest(url, HttpMethod.GET, queryParameters)
+            Log.d(TAG, "Deserialized response ${httpResponse.body<Any>()}")
             val partialResult: OrderResponse = httpResponse.body()
             if (partialResult.status == "COMPLETED") {
                 val result: OrderResponseCompleted = httpResponse.body()
+                Log.d(TAG, "Deserialized response: $result")
                 return result
             } else if (partialResult.status == "ON_DELIVERY") {
                 val result: OrderResponseOnDelivery = httpResponse.body()
+                Log.d(TAG, "Deserialized response: $result")
                 return result
             }
-
-        }
-        Log.d(TAG, "sid or uid are null, create a user before")
+        }else { Log.d(TAG, "sid or uid are null, create a user before") }
         return null
     }
 
@@ -219,7 +222,7 @@ object CommunicationManager {
             )
             val httpResponse = genericRequest(url, HttpMethod.GET, queryParameters)
             val result: NearMenuResponse = httpResponse.body()
-            Log.d(TAG, "Deserialized response: $result")
+            Log.d(TAG, "Deserialized response (menus): $result")
             return result
         }
         Log.d(TAG, "sid or uid are null, create a user before")
@@ -253,7 +256,7 @@ object CommunicationManager {
             )
             val httpResponse = genericRequest(url, HttpMethod.GET, queryParameters)
             val result: MenuDetailed = httpResponse.body()
-            Log.d(TAG, "Deserialized response: $result")
+            Log.d(TAG, "Deserialized response (menuDetail): $result")
             return result
         }
         Log.d(TAG, "sid or uid are null, create a user before")

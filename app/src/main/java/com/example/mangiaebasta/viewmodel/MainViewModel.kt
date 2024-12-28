@@ -16,9 +16,11 @@ import com.example.mangiaebasta.datasource.CommunicationManager
 import com.example.mangiaebasta.datasource.DatabaseManager
 import com.example.mangiaebasta.datasource.DatastoreManager
 import com.example.mangiaebasta.datasource.LocationManager
+import com.example.mangiaebasta.model.CreateUserResponse
 import com.example.mangiaebasta.model.GetUserResponse
 import com.example.mangiaebasta.model.InitialRegion
 import com.example.mangiaebasta.model.LocationData
+import com.example.mangiaebasta.model.Menu
 import com.example.mangiaebasta.model.MenuDetailed
 import com.example.mangiaebasta.model.MenuWImage
 import com.example.mangiaebasta.model.OrderResponse
@@ -50,6 +52,16 @@ class MainViewModel(
 
     // APP
 
+    //RECUPERO USER DAL DATASTORE
+    init {
+        viewModelScope.launch {
+            dataStoreManager.getUser().collect {
+                Log.d("TAG", "GetUserResponse from datastore: $it")
+                _user.value = it
+            }
+        }
+    }
+
     private val _initialized = MutableStateFlow(false)
     val initialized: StateFlow<Boolean> = _initialized
 
@@ -59,7 +71,7 @@ class MainViewModel(
     suspend fun checkFirstRun(): Boolean {
         return try {
             Log.d(TAG, "Checking first run")
-            sid = dataStoreManager.getSidFromDataStore().toString()
+            sid = dataStoreManager.getSidFromDataStore()
             uid = dataStoreManager.getUidFromDataStore()
             if (sid == null || sid == "null") {
                 Log.d(TAG, "First run")
@@ -81,7 +93,6 @@ class MainViewModel(
 
 
     //LOCATION
-
     private var _locationPermissionGranted = MutableStateFlow(false)
     val locationPermissionGranted: StateFlow<Boolean> = _locationPermissionGranted
 
@@ -108,7 +119,6 @@ class MainViewModel(
     val address: StateFlow<Address?> = _address
 
     fun loadAdress() {
-
         val addresses = location.value?.let {
             geocoder.getFromLocation(
                 it.latitude,
@@ -118,7 +128,6 @@ class MainViewModel(
         }
         if (addresses != null) {
             _address.value = addresses[0]
-            Log.d("MainViewModel", "Address: $address")
         }
     }
 
@@ -200,49 +209,75 @@ class MainViewModel(
     private val _user = MutableStateFlow<GetUserResponse>(GetUserResponse(null, null, null, null, null, null, null, null, null, null))
     val user: StateFlow<GetUserResponse> = _user
 
-    //RECUPERO USER DAL DATASTORE
-    init {
-        viewModelScope.launch {
-            dataStoreManager.getUser().collect {
-                Log.d(TAG, "GetUserResponse from datastore: $it")
-                _user.value = it
-            }
-        }
+    fun setUser(user: GetUserResponse) {
+        _user.value = user
     }
 
+    private val _sid = MutableStateFlow("")
+    private val _uid = MutableStateFlow(0)
 
     suspend fun createNewUser() {
         Log.d(TAG, "Creating new user")
         try {
-            sid = CommunicationManager.createUser().sid
-            uid = CommunicationManager.createUser().uid
-            dataStoreManager.setSidInDataStore(sid)
-            dataStoreManager.setUidInDataStore(uid)
-            Log.d(TAG, "New user create, sid: $sid, uid: $uid")
+            val response: CreateUserResponse = CommunicationManager.createUser()
+            _sid.value = response.sid
+            _uid.value = response.uid
+            dataStoreManager.setSidInDataStore(_sid.value)
+            dataStoreManager.setUidInDataStore(_uid.value)
+            Log.d(TAG, "New user create, sid: ${_sid.value}, uid: ${_uid.value}")
             _firstRun.value = false
-            _user.value = GetUserResponse(null, null, null, null, null, null, null, uid, null, null)
+            setUser(GetUserResponse(null, null, null, null, null, null, null, uid = _uid.value , null, null))
+            Log.d(TAG, "New user: ${_user.value}")
+            dataStoreManager.saveUser(_user.value)
         } catch (e: Exception) {
             Log.e(TAG, "Error in createNewUser: $e")
         }
+    }
+
+    //ORDERTRACK
+
+    private val _menuOrdered = MutableStateFlow<MenuDetailed?>(null)
+    val menuOrdered: StateFlow<MenuDetailed?> = _menuOrdered
+
+    suspend fun setMenuOrdered() {
+
+            val mid = dataStoreManager.getMenuOrdered()
+            Log.d("MainViewModel", "Menu ordered: $mid")
+            _menuOrdered.value = mid?.let { CommunicationManager.getMenuDetail(it, location.value!!.latitude, location.value!!.longitude) }
 
     }
 
-    //ORDER
-
-
     private val _orderOnDelivery = MutableStateFlow<OrderResponseOnDelivery?>(null)
-
-    // private val _orderOnDelivery = MutableStateFlow<OrderResponseOnDelivery?>(OrderResponseOnDelivery(1, 1, 37409, "2024-12-26T16:24:14.964Z", "2024-12-26T16:24:14.964Z", "ON_DELIVERY", LocationData(45.4642, 9.19 ), LocationData(45.47, 9.20)))
     val orderOnDelivery: StateFlow<OrderResponseOnDelivery?> = _orderOnDelivery
 
-    fun setOrderOnDelivery() {
-        var value: OrderResponseOnDelivery? = null
-        CoroutineScope(Dispatchers.Main).launch {
-            _orderOnDelivery.value?.let {
-                value = CommunicationManager.getOrderInfo(it.oid) as OrderResponseOnDelivery?
-            }
+    suspend fun setOrderOnDelivery() {
+        try {
+
+                val result = _user.value.lastOid?.let { CommunicationManager.getOrderInfo(it) }
+                Log.d(TAG, "Order info: $result")
+
+                when (result) {
+                    is OrderResponseOnDelivery -> {
+                        _orderOnDelivery.value = result
+                        _user.value.orderStatus = "ON_DELIVERY"
+                        dataStoreManager.saveUser(_user.value)
+                        setInitialRegion(_orderOnDelivery.value!!)
+                        Log.d(TAG, "Order on delivery: ${_orderOnDelivery.value}")
+                    }
+                    is OrderResponseCompleted -> {
+                        Log.d(TAG, "Order completed: $result")
+                        _user.value.orderStatus = "COMPLETED"
+                        dataStoreManager.saveUser(_user.value)
+                        _orderOnDelivery.value = null
+                    }
+                    else -> {
+                        Log.d(TAG, "Unexpected order type or null result")
+                    }
+                }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in setOrderOnDelivery: $e")
         }
-        _orderOnDelivery.value = value
     }
 
     private val _orderOnFocus = MutableStateFlow(false)
@@ -256,7 +291,7 @@ class MainViewModel(
         MutableStateFlow(InitialRegion(LocationData(null, null), null, null))
     val initialRegion: StateFlow<InitialRegion> = _initialRegion
 
-    fun setInitialRegion(orderData: OrderResponse) {
+    fun setInitialRegion(orderData: OrderResponseOnDelivery) {
         initialRegion.value.center.lat =
             (orderData.currentPosition.lat?.plus(orderData.deliveryLocation.lat!!))?.div(2)
         initialRegion.value.center.lng =
@@ -292,50 +327,47 @@ class MainViewModel(
             _userStatus.value = "missingInfo"
             return
         }
-        if (user.value.cardNumber == "" || _user.value.cardExpireMonth == 0 || user.value.cardExpireYear == 0
-            || _user.value.cardCVV == "" || _user.value.cardFullName == ""
-        ) {
-            Log.d("UserValue", "user value: ${user.value}")
+        if (user.value.cardNumber == "" || _user.value.cardExpireMonth == 0 || user.value.cardExpireYear == 0 || _user.value.cardCVV == "" || _user.value.cardFullName == "") {
+            Log.d("UserValue", "user value: ${_user.value}")
             _userStatus.value = "missingBilling"
             return
         }
-        if (orderOnDelivery.value != null) {
+        if (_user.value.orderStatus == "ON_DELIVERY") {
             _userStatus.value = "onDelivery"
             return
         }
 
         try {
-            var orderResponse: OrderResponse? = null
+            var orderResponse: OrderResponseOnDelivery? = null
             CoroutineScope(Dispatchers.Main).launch {
                 orderResponse = CommunicationManager.sendOrder(
                     mid,
                     location.value!!.latitude,
                     location.value!!.longitude
                 )
+                orderResponse?.let {
+                    _user.value.lastOid = it.oid
+                    _user.value.orderStatus = it.status
+                    setInitialRegion(it)
+                }
+                dataStoreManager.saveUser(_user.value)
+                setOrderOnDelivery()
+                _userStatus.value = ""
+                dataStoreManager.saveMenuOrdered(mid)
+                setMenuOrdered()
+                _user.value.orderStatus = "ON_DELIVERY"
+                Log.d("MainViewModel", "Order sent")
+                navController.navigate("orderTrack")
             }
-
-            orderResponse?.let {
-                _user.value.lastOid = it.oid
-                setInitialRegion(it)
-            }
-
-            setOrderOnDelivery()
-            _userStatus.value = ""
-
-            navController.navigate("orderTrack/${menuString}")
         } catch (e: Exception) {
             Log.e("MainViewModel", "Error in sendOrder: $e")
         }
     }
 
-
-    //ORDER TRACK
-
-
     //PROFILE
 
     fun isUserRegistered(): Boolean {
-        if (user.value.firstName?.isNotEmpty() == true || user.value.lastName?.isNotEmpty() == true) {
+        if (_user.value.firstName?.isNotEmpty() == true || _user.value.lastName?.isNotEmpty() == true) {
             Log.d("MainViewModel", "GetUserResponse name is not empty")
             return true
         } else {
@@ -367,24 +399,26 @@ class MainViewModel(
     }
 
     fun updateUserNameData() {
-        Log.d(
-            "updateUserName",
-            "Updating user name data with values: ${_firstNameForm.value}, ${_lastNameForm.value}"
+        //val user = dataStoreManager.getUser()
+        //Log.d("updateUserNameData", "Updating user name data with values: ${user}")
+        val updatedUser = _user.value.copy(
+            firstName = _firstNameForm.value,
+            lastName = _lastNameForm.value
         )
-        _user.value.firstName = _firstNameForm.value
-        _user.value.lastName = _lastNameForm.value
-        Log.d(
-            "updateUserName",
-            "GetUserResponse name data updated with new values: ${_user.value.firstName}, ${_user.value.lastName}"
-        )
-
+        setUser(updatedUser)
         CoroutineScope(Dispatchers.Main).launch {
-            CommunicationManager.updateUser(_user.value)
-            dataStoreManager.saveUser(_user.value)
+            Log.d("updateUserNameData", "Updating user: $updatedUser")
+            try {
+                CommunicationManager.updateUser(updatedUser)
+                dataStoreManager.saveUser(updatedUser)
+            } catch (e: Exception) {
+                Log.e("updateUserNameData", "Error updating user: ${e.message}")
+            }
         }
 
         _userStatus.value = ""
     }
+
 
 
     // EDIT BILLING
@@ -461,35 +495,30 @@ class MainViewModel(
                     return false
                 } else return true
             }
-
             "cardNumber" -> {
                 // Permette l'input incrementale di numeri fino a 16 cifre
                 if (!value.matches(Regex("^\\d{16}$"))) {
                     return false
                 } else return true
             }
-
             "expireMonth" -> {
                 // Permette l'input incrementale di numeri fino a 2 cifre
                 if (!value.matches(Regex("^\\d{2}$"))) {
                     return false
                 } else return true
             }
-
             "expireYear" -> {
                 // Permette l'input incrementale di numeri fino a 2 cifre
                 if (!value.matches(Regex("^\\d{2}$"))) {
                     return false
                 } else return true
             }
-
             "CVV" -> {
                 // Permette l'input incrementale di numeri fino a 3 cifre
                 if (!value.matches(Regex("^\\d{3}$"))) {
                     return false
                 } else return true
             }
-
             else -> return false
         }
     }

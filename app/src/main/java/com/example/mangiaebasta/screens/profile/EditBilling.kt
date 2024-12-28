@@ -36,8 +36,8 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
     val isEditBilling by model.isEditBilling.collectAsState()
 
     var cardNumberForm by remember { mutableStateOf(user.cardNumber) }
-    var expireMonthForm by remember { mutableStateOf(user.cardExpireMonth.toString()) }
-    var expireYearForm by remember { mutableStateOf(user.cardExpireYear.toString()) }
+    var expireMonthForm by remember { mutableStateOf(user.cardExpireMonth) }
+    var expireYearForm by remember { mutableStateOf(user.cardExpireYear) }
     var cvvForm by remember { mutableStateOf(user.cardCVV) }
     var cardFullNameForm by remember { mutableStateOf(user.cardFullName) }
 
@@ -69,11 +69,10 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                     .padding(horizontal = 20.dp, vertical = 40.dp)
                     .fillMaxWidth()
             ) {
-                Text("CARD NUMBER:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
+                Text("Card Number:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
                 if (isEditBilling) {
-                    cardNumberForm?.let {
                         TextField(
-                            value = it,
+                            value = if(cardNumberForm == null) "" else cardNumberForm!!,
                             onValueChange = { newValue ->
                                 if (newValue.matches(Regex("^\\d{0,16}$"))) {
                                     cardNumberForm = newValue
@@ -88,8 +87,6 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             isError = !isCardNumberValid
                         )
-                    }
-
                     if (!isCardNumberValid) {
                         Text("Invalid card number", color = Color.Red)
                     }
@@ -97,14 +94,14 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                     user.cardNumber?.let { Text(it, modifier = Modifier.padding(bottom = 15.dp)) }
                 }
 
-                Text("EXPIRE MONTH:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
+                Text("Expire Month:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
                 if (isEditBilling) {
                     TextField(
-                        value = expireMonthForm,
+                        value = if(expireMonthForm == null) "" else expireMonthForm.toString(),
                         onValueChange = { newValue ->
                             // Accetta solo numeri e controlla che sia un mese valido
                             if (newValue.matches(Regex("^\\d{0,2}$"))) {
-                                expireMonthForm = newValue
+                                expireMonthForm = newValue.toInt()
                                 if (newValue.length == 2) {
                                     val month = newValue.toIntOrNull() ?: 0
                                     if (month in 0..12) {  // Permette anche 0 durante la digitazione
@@ -124,23 +121,19 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                         Text("Invalid Month", color = Color.Red)
                     }
                 } else {
-                    Text(
-                        user.cardExpireMonth.toString(),
-                        modifier = Modifier.padding(bottom = 15.dp)
-                    )
-
+                    user.cardExpireMonth?.let { Text(it.toString(), modifier = Modifier.padding(bottom = 15.dp)) }
                 }
                 Text(
-                    "EXPIRE YEAR:",
+                    "Expire Year:",
                     softWrap = true,
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
                 if (isEditBilling) {
                     TextField(
-                        value = expireYearForm,
+                        value = if(expireYearForm == null) "" else expireYearForm.toString(),
                         onValueChange = { newValue ->
                             if (newValue.matches(Regex("^\\d{0,2}$"))) {
-                                expireYearForm = newValue
+                                expireYearForm = newValue.toInt()
                                 if (newValue.length == 2) {
                                     model.setExpireYearForm(newValue.toInt())
                                     isExpireYearValid = true
@@ -156,17 +149,14 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                         Text("Invalid Year", color = Color.Red)
                     }
                 } else {
-                    Text(
-                        user.cardExpireYear.toString(),
-                        modifier = Modifier.padding(bottom = 15.dp)
-                    )
+                    user.cardExpireYear?.let { Text(it.toString(), modifier = Modifier.padding(bottom = 15.dp)) }
                 }
 
                 Text("CVV:", softWrap = true, modifier = Modifier.padding(bottom = 10.dp))
                 if (isEditBilling) {
-                    cvvForm?.let {
+
                         TextField(
-                            value = it,
+                            value = if(cvvForm == null) "" else cvvForm!!,
                             onValueChange = { newValue ->
                                 // Accetta solo numeri fino a 3 cifre
                                 if (newValue.matches(Regex("^\\d{0,3}$"))) {
@@ -181,7 +171,7 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
                         )
-                    }
+
                     if (!isCVVValid) {
                         Text("Invalid CVV", color = Color.Red)
                     }
@@ -190,7 +180,7 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                 }
 
                 Text(
-                    "CARDFULLNAME:",
+                    "Card Full Name:",
                     softWrap = true,
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
@@ -200,7 +190,7 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                             value = it,
                             onValueChange = { newValue ->
                                 // Accetta solo lettere e al massimo uno spazio
-                                if (newValue.matches(Regex("^[a-zA-Z]*(\\s[a-zA-Z]*)?$"))) {
+                                if (newValue.matches(Regex("^[a-zA-Z](\\s[a-zA-Z])?$"))) {
                                     cardFullNameForm = newValue
                                     if (newValue.matches(Regex("^[a-zA-Z]+ [a-zA-Z]+$"))) {
                                         isCardFullNameValid = true
