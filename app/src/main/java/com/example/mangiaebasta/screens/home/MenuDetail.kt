@@ -12,7 +12,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -21,7 +20,6 @@ import com.example.mangiaebasta.viewmodel.MainViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -32,9 +30,11 @@ import kotlinx.serialization.json.Json
 
 
 @Composable
-fun MenuDetail(mid: Int, navController: NavController, model: MainViewModel) {
-    val menuDetailed by model.menuDetailed.collectAsState()
-    val imageMenuDetailed by model.imageMenuDetailed.collectAsState()
+fun MenuDetail(navController: NavController, model: MainViewModel) {
+
+
+    val menuDetailed = model.menuDetailed.collectAsState().value
+    val imageMenuDetailed = model.imageMenuDetailed.collectAsState().value
 
     // Colori personalizzati
     val orangeColor = Color(0xFFFF9800)
@@ -42,15 +42,16 @@ fun MenuDetail(mid: Int, navController: NavController, model: MainViewModel) {
     val labelTextColor = Color(0xFF666666)
 
     LaunchedEffect(Unit) {
-        model.loadMenuDetailed(mid)
+        model.loadMenuDetailed()
     }
+
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
-        TopBarWithBackArrow("Menu Detail", navController)
+        TopBarWithBackArrow("Menu Detail","homeScreen", navController)
 
         if (menuDetailed.mid != null && imageMenuDetailed != null) {
             Column(

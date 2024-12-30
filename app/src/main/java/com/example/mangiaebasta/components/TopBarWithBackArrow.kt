@@ -21,9 +21,35 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBarWithBackArrow(screenName: String, navController: NavController) {
+fun TopBarWithBackArrow(
+    screenName: String,
+    screenToGoBackTo: String,
+    navController: NavController,
+) {
+
+    fun NavController.navigateBackTo(destination: String) {
+        // Ottieni la destinazione attuale
+        val currentDestination = this.currentBackStackEntry?.destination?.route
+
+        // Controlla se la destinazione è diversa da quella desiderata
+        if (currentDestination == destination) {
+            // Se siamo già sulla destinazione desiderata, non fare nulla
+            return
+        }
+
+        // Naviga alla destinazione desiderata
+        this.navigate(destination) {
+            // Configura il comportamento di navigazione
+            popUpTo(destination) { inclusive = false }
+            launchSingleTop = true // Evita duplicazioni
+        }
+    }
+
+
+
 
     TopAppBar(
         title = {
@@ -44,7 +70,9 @@ fun TopBarWithBackArrow(screenName: String, navController: NavController) {
         ),
         navigationIcon = {
             IconButton(
-                onClick = { navController.popBackStack() },
+                onClick = {
+                    navController.navigateBackTo(screenToGoBackTo)
+                },
                 modifier = Modifier.padding(8.dp)
             ) {
                 Icon(
@@ -57,3 +85,4 @@ fun TopBarWithBackArrow(screenName: String, navController: NavController) {
         modifier = Modifier.shadow(elevation = 4.dp)
     )
 }
+

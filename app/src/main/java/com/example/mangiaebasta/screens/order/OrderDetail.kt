@@ -12,17 +12,11 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.mangiaebasta.model.MenuDetailed
 import com.example.mangiaebasta.model.OrderResponseOnDelivery
-import kotlinx.serialization.json.Json
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -33,25 +27,14 @@ import androidx.compose.ui.text.font.FontWeight
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @Composable
-fun OrderDetail(orderData: OrderResponseOnDelivery, menuString: String, model: MainViewModel) {
-    //var menu by remember { mutableStateOf<MenuDetailed?>(null) }
+fun OrderDetail(orderData: OrderResponseOnDelivery, model: MainViewModel) {
     val menu by model.menuOrdered.collectAsState()
 
     // Definisci i colori personalizzati
     val orangeColor = Color(0xFFFF9800)
     val darkTextColor = Color(0xFF000000)
     val labelTextColor = Color(0xFF666666)
-
-    /*LaunchedEffect(Unit) {
-        try {
-            menu = Json.decodeFromString<MenuDetailed>(menuString)
-            Log.d("OrderDetail", "Menu decoded: ${menu?.price}")
-        } catch (e: Exception) {
-            Log.e("OrderDetail", "Error decoding menu: ${e.message}")
-        }
-    }*/
     Log.d("OrderDetail", "Menu decoded: $menu")
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -73,9 +56,9 @@ fun OrderDetail(orderData: OrderResponseOnDelivery, menuString: String, model: M
                 )
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
                 // Delivery Time Section
                 Column {
                     Text(
@@ -118,18 +101,9 @@ fun OrderDetail(orderData: OrderResponseOnDelivery, menuString: String, model: M
                             color = labelTextColor
                         )
                     )
-                    Log.d("PREZZO", "Price: ${menu?.price}")
-                    /*menu?.price?.let { price ->
-                        Text(
-                            text = "%.2f €".format(price),
-                            style = MaterialTheme.typography.body1.copy(
-                                color = darkTextColor,
-                                fontWeight = FontWeight.Medium
-                            )
-                        )
-                    }*/
+                    Log.d("OrderDetail", "Price: ${menu?.price}")
                     Text(
-                        text = "${menu?.price}",
+                        text = "${menu?.price} €",
                         style = MaterialTheme.typography.body1.copy(
                             color = darkTextColor,
                             fontWeight = FontWeight.Medium

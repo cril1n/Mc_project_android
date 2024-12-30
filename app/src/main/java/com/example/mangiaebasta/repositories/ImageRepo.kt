@@ -33,6 +33,10 @@ class ImageRepo(private val database: DatabaseManager) {
             }
         }
     }
+
+    suspend fun getImageWithMid(mid: Int): String {
+        return database.getImageFromDatabase(mid)?.base64 ?: ""
+    }
     
 
 }

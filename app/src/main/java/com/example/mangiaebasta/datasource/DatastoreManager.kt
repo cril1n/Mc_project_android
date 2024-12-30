@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.mangiaebasta.model.GetUserResponse
-import com.example.mangiaebasta.model.MenuDetailed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -59,12 +58,12 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
         }
     }
 
-    val LASTSCREEN_KEY = stringPreferencesKey("LastScreen_key")
+    val LASTSCREEN_KEY = stringPreferencesKey("lastScreen_key")
 
     fun setLastScreenInDataStore(lastScreen: String?) {
         if (lastScreen == null) return
         CoroutineScope(Dispatchers.Main).launch {
-            dataStore?.edit { preferences ->
+            dataStore.edit { preferences ->
                 preferences[LASTSCREEN_KEY] = lastScreen
                 val savedLastScreen = preferences[LASTSCREEN_KEY]
                 Log.d("DataStoreManager", "New saved screen: $savedLastScreen")
@@ -74,35 +73,35 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
 
     suspend fun getLastScreenFromDataStore(): String? {
         return withContext(Dispatchers.IO) {
-            val preferences = dataStore?.data?.first()
-            preferences?.get(LASTSCREEN_KEY)
+            val preferences = dataStore.data.first()
+            preferences[LASTSCREEN_KEY]
         }
     }
 
-    fun clearDataStore() {
-        CoroutineScope(Dispatchers.IO).launch {
+    val LASTMENU_KEY = intPreferencesKey("lastMenu_key")
+
+    fun setLastMenuInDataStore(lastMenuMid: Int) {
+        CoroutineScope(Dispatchers.Main).launch {
             dataStore.edit { preferences ->
-                preferences.clear() // Rimuove tutte le coppie chiave-valore
+                preferences[LASTMENU_KEY] = lastMenuMid
+                val savedLastMenu = preferences[LASTMENU_KEY]
+                Log.d("DataStoreManager", "New saved Menu: $savedLastMenu")
             }
-            Log.d("StorageManager", "Data store cleared")
         }
     }
 
-    //USER
-    object PreferencesKeys {
-        val FIRST_NAME = stringPreferencesKey("first_name")
-        val LAST_NAME = stringPreferencesKey("last_name")
-        val CARD_FULL_NAME = stringPreferencesKey("card_full_name")
-        val CARD_NUMBER = stringPreferencesKey("card_number")
-        val CARD_EXPIRE_MONTH = intPreferencesKey("card_expire_month")
-        val CARD_EXPIRE_YEAR = intPreferencesKey("card_expire_year")
-        val CARD_CVV = stringPreferencesKey("card_cvv")
-        val LAST_OID = intPreferencesKey("last_oid")
-        val ORDER_STATUS = stringPreferencesKey("order_status")
-        val UID = intPreferencesKey("uid")
-        val MID = intPreferencesKey("mid")
+    suspend fun getLastMenuFromDataStore(): Int {
+        Log.d("DataStoreManager", "Getting last menu from data store")
+        try {
+            return withContext(Dispatchers.IO) {
+                val preferences = dataStore.data.first()
+                preferences[LASTMENU_KEY]!!
+            }
+        } catch (e: Exception) {
+            Log.d("DataStoreManager", "Error getting last menu from data store: $e")
+        }
+        return -1
     }
-
 
     suspend fun saveMenuOrdered ( mid : Int) {
         Log.d("StorageManager", "Saving menu ordered: $mid")
@@ -122,6 +121,22 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
             preferences[PreferencesKeys.MID]
         }
     }
+
+    //USER
+    object PreferencesKeys {
+        val FIRST_NAME = stringPreferencesKey("first_name")
+        val LAST_NAME = stringPreferencesKey("last_name")
+        val CARD_FULL_NAME = stringPreferencesKey("card_full_name")
+        val CARD_NUMBER = stringPreferencesKey("card_number")
+        val CARD_EXPIRE_MONTH = intPreferencesKey("card_expire_month")
+        val CARD_EXPIRE_YEAR = intPreferencesKey("card_expire_year")
+        val CARD_CVV = stringPreferencesKey("card_cvv")
+        val LAST_OID = intPreferencesKey("last_oid")
+        val ORDER_STATUS = stringPreferencesKey("order_status")
+        val UID = intPreferencesKey("uid")
+        val MID = intPreferencesKey("mid")
+    }
+
     suspend fun saveUser( user: GetUserResponse) {
         Log.d("StorageManager", "Saving user: $user")
         try{
@@ -158,6 +173,15 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
                 orderStatus = preferences[PreferencesKeys.ORDER_STATUS],
                 uid = preferences[PreferencesKeys.UID]?.toInt(),
             )
+        }
+    }
+
+    fun clearDataStore() {
+        CoroutineScope(Dispatchers.IO).launch {
+            dataStore.edit { preferences ->
+                preferences.clear() // Rimuove tutte le coppie chiave-valore
+            }
+            Log.d("StorageManager", "Data store cleared")
         }
     }
 

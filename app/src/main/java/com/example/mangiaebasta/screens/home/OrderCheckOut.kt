@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.mangiaebasta.R
 import com.example.mangiaebasta.components.TopBarWithBackArrow
 import com.example.mangiaebasta.model.MenuDetailed
@@ -51,6 +52,8 @@ import kotlinx.serialization.json.Json
 
 @Composable
 fun OrderCheckOut(menuString: String, navController: NavHostController, model: MainViewModel) {
+
+
     var menu by remember { mutableStateOf<MenuDetailed?>(null) }
     val address by model.address.collectAsState()
 
@@ -71,7 +74,7 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
-        TopBarWithBackArrow("Order check out", navController)
+        TopBarWithBackArrow("Order check out","homeScreen", navController)
 
         Column(
             modifier = Modifier
@@ -150,7 +153,7 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
             Button(
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
-                        menu?.mid?.let { model.sendOrder(it, navController, menuString) }
+                        menu?.mid?.let { model.sendOrder(it, navController) }
                         model.setShowDialog()
                     }
                 },
@@ -219,7 +222,7 @@ fun UserStatusDialog(model: MainViewModel, navController: NavHostController) {
         "missingInfo" -> Triple(
             "Missing personal info",
             "You need to complete your personal info before ordering",
-            "profileEdit"
+            "profileScreen"
         )
         "missingBilling" -> Triple(
             "Missing billing info",

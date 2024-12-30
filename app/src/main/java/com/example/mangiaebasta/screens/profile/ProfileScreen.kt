@@ -1,5 +1,6 @@
 package com.example.mangiaebasta.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.mangiaebasta.R
 import com.example.mangiaebasta.model.GetUserResponse
 import com.example.mangiaebasta.viewmodel.MainViewModel
@@ -35,11 +38,20 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
 
     val user = model.user.collectAsState().value
 
-
-    val flag = model.isUserRegistered()
-    if (!flag) {
-        navController.navigate("firstRegistration")
+    // Monitoriamo i cambiamenti di route
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    // Aggiorniamo lo stato quando la route cambia
+    LaunchedEffect(currentRoute) {
+        if (currentRoute != null) {
+            model.setLastScreen(currentRoute)
+        }
+        val flag = model.isUserRegistered()
+        if (!flag) {
+            navController.navigate("firstRegistration")
+        }
     }
+
+
 
     ProfileHeader()
 
@@ -76,7 +88,7 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
         // LOGOUT BUTTON
         Button(
             onClick = {
-                //TODO
+                model.resetApp()
             },
             colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF6200EE), // Colore primario in linea con il tema

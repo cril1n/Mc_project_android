@@ -23,8 +23,9 @@ fun MenuCard(menu: MenuWImage, navController: NavController, model: MainViewMode
             .padding(8.dp),
         shape = RoundedCornerShape(12.dp),
         onClick = {
+            model.setSelectedMid(menu.menu.mid)
             model.setImageForDetail(menu.image)
-            navController.navigate("menuDetail/${menu.menu.mid}")
+            navController.navigate("menuDetail")
         }
     ) {
         Row(

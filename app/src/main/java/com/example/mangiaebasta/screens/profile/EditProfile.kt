@@ -39,7 +39,7 @@ fun EditProfile(model: MainViewModel, navController: NavController) {
     var lastNameForm by remember { mutableStateOf(user.lastName) }
 
     Column {
-        TopBarWithBackArrow("Profile edit", navController)
+        TopBarWithBackArrow("Profile edit","profileScreen", navController)
 
         Column(
             modifier = Modifier

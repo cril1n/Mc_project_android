@@ -104,6 +104,11 @@ object CommunicationManager {
         uid = u
     }
 
+    fun resetSidUid() {
+        sid = null
+        uid = null
+    }
+
     suspend fun createUser(): CreateUserResponse {
         Log.d(TAG, "createUser")
 
