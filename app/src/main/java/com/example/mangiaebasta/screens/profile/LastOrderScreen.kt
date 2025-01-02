@@ -9,5 +9,5 @@ import com.example.mangiaebasta.viewmodel.MainViewModel
 @Composable
 fun LastOrderScreen(model: MainViewModel, navController: NavController) {
     val user = model.user.collectAsState().value
-    TopBarWithBackArrow("Last order info", navController)
+    TopBarWithBackArrow("Last order info","profileScreen", navController)
 }

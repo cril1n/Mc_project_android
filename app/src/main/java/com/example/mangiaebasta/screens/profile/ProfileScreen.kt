@@ -1,10 +1,12 @@
 package com.example.mangiaebasta.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,16 +17,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.mangiaebasta.R
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(model: MainViewModel, navController: NavController) {
+
     val user = model.user.collectAsState().value
 
-    if (!model.isUserRegistered()) {
-        navController.navigate("firstRegistration")
+    // Monitoriamo i cambiamenti di route
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    // Aggiorniamo lo stato quando la route cambia
+    LaunchedEffect(currentRoute) {
+        if (currentRoute != null) {
+            model.setLastScreen(currentRoute)
+        }
+        if (!model.isUserRegistered()) {
+            navController.navigate("firstRegistration")
+        }
     }
 
     Scaffold(
@@ -105,7 +117,9 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
 
             // Delete Account Button
             TextButton(
-                onClick = { /* TODO: Handle account deletion */ },
+                onClick = {
+                    model.resetApp()
+                },
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = Color.Red
                 ),
@@ -166,4 +180,3 @@ private fun MenuButton(
         }
     }
 }
-

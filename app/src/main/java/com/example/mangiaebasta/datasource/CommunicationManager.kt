@@ -71,15 +71,21 @@ object CommunicationManager {
         val completeUrlString = urlBuilder.build().toString()
         Log.d(TAG, "completeUrlString: $completeUrlString")
 
-        val request: HttpRequestBuilder.() -> Unit = {
-            requestBody?.let {
-                contentType(ContentType.Application.Json)
-                setBody(requestBody)
-            }
+        try {
 
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in genericRequest: $e")
         }
+
+
         val result: HttpResponse
         try {
+            val request: HttpRequestBuilder.() -> Unit = {
+                requestBody?.let {
+                    contentType(ContentType.Application.Json)
+                    setBody(requestBody)
+                }
+            }
             result = when (method) {
                 HttpMethod.GET -> client.get(completeUrlString, request)
                 HttpMethod.POST -> client.post(completeUrlString, request)
@@ -102,6 +108,11 @@ object CommunicationManager {
     fun setSidUid(s: String, u: Int) {
         sid = s
         uid = u
+    }
+
+    fun resetSidUid() {
+        sid = null
+        uid = null
     }
 
     suspend fun createUser(): CreateUserResponse {
@@ -128,7 +139,7 @@ object CommunicationManager {
             val result: GetUserResponse = httpResponse.body()
             Log.d(TAG, "Deserialized response: $result")
             return result
-        }else Log.d(TAG, "sid or uid are null, create a user before")
+        } else Log.d(TAG, "sid or uid are null, create a user before")
         return null
     }
 
@@ -141,11 +152,11 @@ object CommunicationManager {
             val requestBody = UpdateUserRequest(
                 firstName = user.firstName,
                 lastName = user.lastName,
-                cardFullName =  user.cardFullName,
-                cardNumber =  user.cardNumber,
-                cardExpireMonth =  user.cardExpireMonth,
-                cardExpireYear =  user.cardExpireYear,
-                cardCVV =  user.cardCVV,
+                cardFullName = user.cardFullName,
+                cardNumber = user.cardNumber,
+                cardExpireMonth = user.cardExpireMonth,
+                cardExpireYear = user.cardExpireYear,
+                cardCVV = user.cardCVV,
                 sid = sid
             )
             Log.d(TAG, "Request body: $requestBody")
@@ -154,7 +165,7 @@ object CommunicationManager {
                 Log.d(TAG, "User updated")
                 return "User updated"
             }
-        }else Log.d(TAG, "sid or uid are null, create a user before")
+        } else Log.d(TAG, "sid or uid are null, create a user before")
         return "Something went wrong"
     }
 
@@ -172,7 +183,7 @@ object CommunicationManager {
                 Log.d(TAG, "Request body: ${Json.encodeToString(requestBody)}")
                 val httpResponse = genericRequest(url, HttpMethod.POST, requestBody = requestBody)
                 Log.d(TAG, "Response: $httpResponse")
-                if(httpResponse.status.value !in 200..299) {
+                if (httpResponse.status.value !in 200..299) {
                     Log.d(TAG, "Error during order creation")
                     return null
                 }
@@ -206,7 +217,9 @@ object CommunicationManager {
                 Log.d(TAG, "Deserialized response: $result")
                 return result
             }
-        }else { Log.d(TAG, "sid or uid are null, create a user before") }
+        } else {
+            Log.d(TAG, "sid or uid are null, create a user before")
+        }
         return null
     }
 
@@ -254,10 +267,14 @@ object CommunicationManager {
                 "lat" to lat.toString(),
                 "lng" to lng.toString()
             )
-            val httpResponse = genericRequest(url, HttpMethod.GET, queryParameters)
-            val result: MenuDetailed = httpResponse.body()
-            Log.d(TAG, "Deserialized response (menuDetail): $result")
-            return result
+            try {
+                val httpResponse = genericRequest(url, HttpMethod.GET, queryParameters)
+                val result: MenuDetailed = httpResponse.body()
+                Log.d(TAG, "Deserialized response (menuDetail): $result")
+                return result
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in getMenuDetail: $e")
+            }
         }
         Log.d(TAG, "sid or uid are null, create a user before")
         return null
