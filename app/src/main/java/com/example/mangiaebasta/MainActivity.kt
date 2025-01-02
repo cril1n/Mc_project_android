@@ -104,7 +104,7 @@ fun MyApp(model: MainViewModel, key: Boolean) {
         }
 
         LaunchedEffect(Unit) {
-            val fRun = model.checkFirstRun(permissionLauncher)
+            model.checkFirstRun(permissionLauncher)
         }
 
         if (locationPermissionDenied) {

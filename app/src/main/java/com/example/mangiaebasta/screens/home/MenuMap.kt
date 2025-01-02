@@ -111,8 +111,9 @@ fun MenuMap(
                     Log.d("MenuMap", "Cliccato su ${menu.menu.name}")
 
                     // Navigazione (se necessario)
+                    model.setSelectedMid(menu.menu.mid)
                     model.setImageForDetail(menu.image)
-                    navController.navigate("menuDetail/${menu.menu.mid}")
+                    navController.navigate("menuDetail")
 
                     true // Return true per indicare che il clic è stato gestito
                 }
