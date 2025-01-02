@@ -40,7 +40,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.mangiaebasta.R
 import com.example.mangiaebasta.components.TopBarWithBackArrow
 import com.example.mangiaebasta.model.MenuDetailed

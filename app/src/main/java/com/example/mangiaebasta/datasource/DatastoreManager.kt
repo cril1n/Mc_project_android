@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
+class DatastoreManager(private val dataStore: DataStore<Preferences>) {
     private val SID_KEY = stringPreferencesKey("sid_key")
 
     fun setSidInDataStore(sid: String?) {
@@ -60,14 +60,12 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
 
     val LASTSCREEN_KEY = stringPreferencesKey("lastScreen_key")
 
-    fun setLastScreenInDataStore(lastScreen: String?) {
+    suspend fun setLastScreenInDataStore(lastScreen: String?) {
         if (lastScreen == null) return
-        CoroutineScope(Dispatchers.Main).launch {
-            dataStore.edit { preferences ->
-                preferences[LASTSCREEN_KEY] = lastScreen
-                val savedLastScreen = preferences[LASTSCREEN_KEY]
-                Log.d("DataStoreManager", "New saved screen: $savedLastScreen")
-            }
+        dataStore.edit { preferences ->
+            preferences[LASTSCREEN_KEY] = lastScreen
+            val savedLastScreen = preferences[LASTSCREEN_KEY]
+            Log.d("DataStoreManager", "New saved screen: $savedLastScreen")
         }
     }
 
@@ -80,17 +78,15 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
 
     val LASTMENU_KEY = intPreferencesKey("lastMenu_key")
 
-    fun setLastMenuInDataStore(lastMenuMid: Int) {
-        CoroutineScope(Dispatchers.Main).launch {
-            dataStore.edit { preferences ->
-                preferences[LASTMENU_KEY] = lastMenuMid
-                val savedLastMenu = preferences[LASTMENU_KEY]
-                Log.d("DataStoreManager", "New saved Menu: $savedLastMenu")
-            }
+    suspend fun saveLastSelectedMid(lastMenuMid: Int) {
+        dataStore.edit { preferences ->
+            preferences[LASTMENU_KEY] = lastMenuMid
+            val savedLastMenu = preferences[LASTMENU_KEY]
+            Log.d("DataStoreManager", "New saved Menu: $savedLastMenu")
         }
     }
 
-    suspend fun getLastMenuFromDataStore(): Int {
+    suspend fun getLastSelectedMid(): Int {
         Log.d("DataStoreManager", "Getting last menu from data store")
         try {
             return withContext(Dispatchers.IO) {
@@ -103,13 +99,13 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
         return -1
     }
 
-    suspend fun saveMenuOrdered ( mid : Int) {
+    suspend fun saveMenuOrdered(mid: Int) {
         Log.d("StorageManager", "Saving menu ordered: $mid")
-        try{
+        try {
             dataStore.edit { preferences ->
                 preferences[PreferencesKeys.MID] = mid
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Log.d("StorageManager", "Error saving menu ordered: $e")
         }
     }
@@ -137,23 +133,32 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>)  {
         val MID = intPreferencesKey("mid")
     }
 
-    suspend fun saveUser( user: GetUserResponse) {
+    suspend fun saveUser(user: GetUserResponse) {
         Log.d("StorageManager", "Saving user: $user")
-        try{
+        try {
             dataStore.edit { preferences ->
                 user.firstName?.let { preferences[PreferencesKeys.FIRST_NAME] = user.firstName!! }
                 user.lastName?.let { preferences[PreferencesKeys.LAST_NAME] = user.lastName!! }
-                user.cardFullName?.let { preferences[PreferencesKeys.CARD_FULL_NAME] = user.cardFullName!! }
-                user.cardNumber?.let { preferences[PreferencesKeys.CARD_NUMBER] = user.cardNumber!! }
-                user.cardExpireMonth?.let { preferences[PreferencesKeys.CARD_EXPIRE_MONTH] = user.cardExpireMonth!! }
-                user.cardExpireYear?.let { preferences[PreferencesKeys.CARD_EXPIRE_YEAR] = user.cardExpireYear!! }
+                user.cardFullName?.let {
+                    preferences[PreferencesKeys.CARD_FULL_NAME] = user.cardFullName!!
+                }
+                user.cardNumber?.let {
+                    preferences[PreferencesKeys.CARD_NUMBER] = user.cardNumber!!
+                }
+                user.cardExpireMonth?.let {
+                    preferences[PreferencesKeys.CARD_EXPIRE_MONTH] = user.cardExpireMonth!!
+                }
+                user.cardExpireYear?.let {
+                    preferences[PreferencesKeys.CARD_EXPIRE_YEAR] = user.cardExpireYear!!
+                }
                 user.cardCVV?.let { preferences[PreferencesKeys.CARD_CVV] = user.cardCVV!! }
                 user.lastOid?.let { preferences[PreferencesKeys.LAST_OID] = user.lastOid!! }
-                user.orderStatus?.let { preferences[PreferencesKeys.ORDER_STATUS] = user.orderStatus!!
+                user.orderStatus?.let {
+                    preferences[PreferencesKeys.ORDER_STATUS] = user.orderStatus!!
                 }
                 user.uid?.let { preferences[PreferencesKeys.UID] = it }
             }
-        }catch(e: Exception){
+        } catch (e: Exception) {
             Log.d("StorageManager", "Error saving user: $e")
         }
 

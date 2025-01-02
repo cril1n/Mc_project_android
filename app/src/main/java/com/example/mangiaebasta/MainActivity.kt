@@ -32,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.key
+import kotlinx.coroutines.runBlocking
 
 
 val Context.dataStore by preferencesDataStore(name = "settings")
@@ -39,9 +40,12 @@ val Context.dataStore by preferencesDataStore(name = "settings")
 
 class MainActivity : ComponentActivity() {
 
+    private lateinit var mainViewModel: MainViewModel // Dichiara il ViewModel come proprietà di classe
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         val databaseManager = DatabaseManager(this)
         val dataStoreManager = DatastoreManager(dataStore)
         val locationManager = LocationManager(this)
@@ -51,16 +55,29 @@ class MainActivity : ComponentActivity() {
                 MainViewModel(databaseManager, dataStoreManager, locationManager, geocoder)
             }
         }
-        val mainViewModel: MainViewModel by viewModels() { factory }
+        mainViewModel = viewModels<MainViewModel> { factory }.value // Inizializza il ViewModel
+
         setContent {
             val resetKey by mainViewModel.reset.collectAsState()
-            // Usa il valore di resetKey per forzare una nuova composizione
             CompositionLocalProvider {
                 MyApp(mainViewModel, resetKey)
             }
         }
     }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("MainActivity", "onStop called")
+        runBlocking { // Blocca solo la coroutine, non l'intero thread principale
+            mainViewModel.saveLastSelectedMid()
+            mainViewModel.saveLastScreen()
+        }
+    }
+
 }
+
+
+
 
 
 @Composable
@@ -87,10 +104,7 @@ fun MyApp(model: MainViewModel, key: Boolean) {
         }
 
         LaunchedEffect(Unit) {
-            val fRun = model.checkFirstRun()
-            if (!fRun) {
-                model.checkLocationPermission(permissionLauncher)
-            }
+            val fRun = model.checkFirstRun(permissionLauncher)
         }
 
         if (locationPermissionDenied) {

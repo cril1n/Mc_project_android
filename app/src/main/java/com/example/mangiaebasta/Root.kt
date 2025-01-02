@@ -43,7 +43,7 @@ import com.example.mangiaebasta.viewmodel.MainViewModel
 @Composable
 fun Root(model: MainViewModel) {
     Log.d("Root", "Root called")
-    val lastScreen = model.lastScreen.collectAsState().value
+    val lastScreen = model.lastScreen.value
     var tabScreen by remember { mutableStateOf("") }
     val navController = rememberNavController()
 

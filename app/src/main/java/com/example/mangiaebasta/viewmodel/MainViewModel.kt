@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.math.abs
 
 
@@ -54,11 +53,33 @@ class MainViewModel(
     private val _lastScreen = MutableStateFlow("homeScreen")
     val lastScreen: StateFlow<String> = _lastScreen
 
+    private var _selectedMid = MutableStateFlow(-1)
+    val selectedMid: StateFlow<Int?> = _selectedMid
+
+
     private suspend fun checkLastScreen() {
         try {
-            if (dataStoreManager.getLastScreenFromDataStore() != null) {
+            val lastScreen = dataStoreManager.getLastScreenFromDataStore()
+            if (lastScreen != null) {
                 Log.d("MainViewModel", "Last screen non è null")
-                _lastScreen.value = dataStoreManager.getLastScreenFromDataStore()!!
+                if (lastScreen == "menuDetail") {
+                    val lastMid = dataStoreManager.getLastSelectedMid()
+                    if (lastMid != -1) {
+                        _lastScreen.value = lastScreen
+                        Log.d("MainViewModel", "Last screen è $lastScreen")
+                        _selectedMid.value = lastMid
+                        Log.d("MainViewModel", "Last menu ordered è: $lastMid")
+                        val base64 = imageRepo.getImageWithMid(lastMid)
+                        val byteArray = Base64.decode(base64, Base64.DEFAULT)
+                        _imageMenuDetailed.value = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                    } else {
+                        Log.d("MainViewModel", "Errore nel salvataggio dell'ultimo menu aperto)")
+                        _lastScreen.value = "homeScreen"
+                    }
+                } else {
+                    _lastScreen.value = lastScreen
+                    Log.d("MainViewModel", "Last screen è $lastScreen")
+                }
             } else {
                 Log.d("MainViewModel", "Last screen è null")
                 _lastScreen.value = "homeScreen"
@@ -69,7 +90,19 @@ class MainViewModel(
     }
 
     fun setLastScreen(lastScreen: String) {
-        dataStoreManager.setLastScreenInDataStore(lastScreen)
+        _lastScreen.value = lastScreen
+    }
+
+    suspend fun saveLastScreen() {
+        dataStoreManager.setLastScreenInDataStore(_lastScreen.value)
+    }
+
+    fun setSelectedMid(mid: Int) {
+        _selectedMid.value = mid
+    }
+
+    suspend fun saveLastSelectedMid() {
+        dataStoreManager.saveLastSelectedMid(_selectedMid.value)
     }
 
 
@@ -89,7 +122,7 @@ class MainViewModel(
     private val _firstRun = MutableStateFlow(true)
     val firstRun: StateFlow<Boolean> = _firstRun
 
-    suspend fun checkFirstRun(): Boolean {
+    suspend fun checkFirstRun(permissionLauncher: ManagedActivityResultLauncher<String, Boolean>): Boolean {
         return try {
             Log.d(TAG, "Checking first run")
             sid = dataStoreManager.getSidFromDataStore()
@@ -102,9 +135,10 @@ class MainViewModel(
             } else {
                 Log.d(TAG, "Not first run sid: $sid, uid: $uid")
                 CommunicationManager.setSidUid(sid!!, uid!!)
+                checkLocationPermission(permissionLauncher)
+                checkLastScreen()
                 _firstRun.value = false
                 _initialized.value = true
-                checkLastScreen()
                 false
             }
         } catch (e: Exception) {
@@ -197,13 +231,6 @@ class MainViewModel(
 
     //MENU DETAIL
 
-    private var _selectedMid = MutableStateFlow(-1)
-    val selectedMid: StateFlow<Int?> = _selectedMid
-
-    fun setSelectedMid(mid: Int) {
-        _selectedMid.value = mid
-    }
-
     private var _menuDetailed =
         MutableStateFlow(MenuDetailed(null, null, null, null, null, null, null, null))
     val menuDetailed: StateFlow<MenuDetailed> = _menuDetailed
@@ -213,6 +240,8 @@ class MainViewModel(
 
     suspend fun loadMenuDetailed() {
         Log.d("MainViewModel", "Loading menu detailed")
+        Log.d("MainViewModel", "Selected mid: ${_selectedMid.value}")
+        Log.d("MainViewModel", "Location: ${location.value}")
         try {
             val menu = CommunicationManager.getMenuDetail(
                 _selectedMid.value,

@@ -51,7 +51,7 @@ fun MenuDetail(navController: NavController, model: MainViewModel) {
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
-        TopBarWithBackArrow("Menu Detail","homeScreen", navController)
+        TopBarWithBackArrow("Menu Detail","homeScreen", navController, model)
 
         if (menuDetailed.mid != null && imageMenuDetailed != null) {
             Column(

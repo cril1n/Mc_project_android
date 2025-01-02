@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.mangiaebasta.viewmodel.MainViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,6 +29,7 @@ fun TopBarWithBackArrow(
     screenName: String,
     screenToGoBackTo: String,
     navController: NavController,
+    model: MainViewModel? = null
 ) {
 
     fun NavController.navigateBackTo(destination: String) {
@@ -71,6 +73,7 @@ fun TopBarWithBackArrow(
         navigationIcon = {
             IconButton(
                 onClick = {
+                    model?.setSelectedMid(-1)
                     navController.navigateBackTo(screenToGoBackTo)
                 },
                 modifier = Modifier.padding(8.dp)
