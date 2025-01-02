@@ -1,12 +1,18 @@
 package com.example.mangiaebasta.screens.profile
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -26,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mangiaebasta.components.TopBarWithBackArrow
 import com.example.mangiaebasta.viewmodel.MainViewModel
+import androidx.compose.material.*
 
 @Composable
 fun EditBilling(model: MainViewModel, navController: NavController) {
@@ -146,8 +153,6 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                         )
                     }
                 }
-
-
                 Text(
                     "Expire Year:",
                     softWrap = true,
@@ -181,6 +186,9 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                         isError = !isExpireYearValid,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    if (!isExpireYearValid) {
+                        Text("Invalid Year", color = Color.Red)
+                    }
                 } else {
                     user.cardExpireYear?.let {
                         Text(
@@ -216,8 +224,6 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                 } else {
                     user.cardCVV?.let { Text(it, modifier = Modifier.padding(bottom = 15.dp)) }
                 }
-
-
 
                 Text(
                     "Card Full Name:",
@@ -268,12 +274,26 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                             model.updateUserCardData()
                         }
                         model.switchEditBillingMode()
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9800)),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     if (isEditBilling) {
-                        Text("SAVE")
+                        Text(
+                            "SAVE",
+                            color = Color.White,
+                            style = MaterialTheme.typography.button.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
                     } else {
-                        Text("EDIT")
+                        Text(
+                            "EDIT",
+                            color = Color.White,
+                            style = MaterialTheme.typography.button.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
                     }
                 }
             }

@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBarWithBackArrow(
@@ -49,9 +50,6 @@ fun TopBarWithBackArrow(
             launchSingleTop = true // Evita duplicazioni
         }
     }
-
-
-
 
     TopAppBar(
         title = {
@@ -88,4 +86,3 @@ fun TopBarWithBackArrow(
         modifier = Modifier.shadow(elevation = 4.dp)
     )
 }
-
