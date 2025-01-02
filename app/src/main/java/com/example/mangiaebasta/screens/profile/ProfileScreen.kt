@@ -1,21 +1,9 @@
 package com.example.mangiaebasta.screens.profile
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -23,149 +11,159 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mangiaebasta.R
-import com.example.mangiaebasta.model.GetUserResponse
 import com.example.mangiaebasta.viewmodel.MainViewModel
-
-@Composable
-fun ProfileScreen(model: MainViewModel, navController: NavController) {
-
-    val user = model.user.collectAsState().value
-
-
-    val flag = model.isUserRegistered()
-    if (!flag) {
-        navController.navigate("firstRegistration")
-    }
-
-    ProfileHeader()
-
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.SpaceBetween, // Distribuisce meglio gli elementi
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 100.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            ImageWithText(user)
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 40.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.LightGray)
-                    .padding(16.dp), // Interno per migliorare lo spacing
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ProfileInfo(navController)
-                ProfileBillingInfo(navController)
-                LastOrderInfo(navController)
-            }
-        }
-
-        // LOGOUT BUTTON
-        Button(
-            onClick = {
-                //TODO
-            },
-            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF6200EE), // Colore primario in linea con il tema
-                contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(50), // Forma rotonda
-            modifier = Modifier
-                .padding(vertical = 20.dp)
-                .size(width = 200.dp, height = 50.dp) // Dimensioni del pulsante
-        ) {
-            Text(text = "Logout", fontSize = 16.sp)
-        }
-    }
-
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileHeader() {
-    TopAppBar(
-        title = {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Profile",
-                    color = Color.White
+fun ProfileScreen(model: MainViewModel, navController: NavController) {
+    val user = model.user.collectAsState().value
+
+    if (!model.isUserRegistered()) {
+        navController.navigate("firstRegistration")
+    }
+
+    Scaffold(
+        topBar = {
+            Column {
+                CenterAlignedTopAppBar(
+                    title = { Text("Profile") },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.White,
+                        titleContentColor = Color.Black
+                    ),
+                )
+                HorizontalDivider(
+                    modifier = Modifier.fillMaxWidth(), // Larghezza completa
+                    thickness = 2.dp, // Spessore della linea
+                    color = Color(0xFFFFA500) // Colore arancione
                 )
             }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(0xFF390073) // Colore di sfondo
-        )
-    )
-}
-
-@Composable
-fun ImageWithText(user: GetUserResponse) {
-    Column(
-        Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "Descrizione immagine",
-            modifier = Modifier.size(200.dp)
-        )
-        Text(
-            text = "${user.firstName} ${user.lastName}",
-            fontSize = 20.sp
-        )
-    }
-}
-
-@Composable
-fun ProfileInfo(navController: NavController) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Button(onClick = { navController.navigate("profileEdit") }, Modifier.size(200.dp, 50.dp)) {
-            Text(text = "Edit Profile")
         }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
 
-    }
+            // Logo and Name
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(100.dp)
+                )
+                Text(
+                    text = "${user.firstName} ${user.lastName}",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
 
-}
+            // Menu Items Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    MenuButton(
+                        icon = R.drawable.person,
+                        text = "Personal Info",
+                        onClick = { navController.navigate("profileEdit") }
+                    )
+                    MenuButton(
+                        icon = R.drawable.order,
+                        text = "Last Order",
+                        onClick = { navController.navigate("lastOrder") }
+                    )
+                    MenuButton(
+                        icon = R.drawable.card,
+                        text = "Payment Info",
+                        onClick = { navController.navigate("billingEdit") }
+                    )
+                }
+            }
 
-@Composable
-fun ProfileBillingInfo(navController: NavController) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Button(onClick = { navController.navigate("billingEdit") }, Modifier.size(200.dp, 50.dp)) {
-            Text(text = "Edit Billing Info")
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Delete Account Button
+            TextButton(
+                onClick = { /* TODO: Handle account deletion */ },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = Color.Red
+                ),
+                border = ButtonDefaults.outlinedButtonBorder(),
+
+            ) {
+                Text(
+                    "DELETE ACCOUNT",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun LastOrderInfo(navController: NavController) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+private fun MenuButton(
+    icon: Int,
+    text: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        color = Color.Transparent
     ) {
-        Button(onClick = { navController.navigate("lastOrder") }, Modifier.size(200.dp, 50.dp)) {
-            Text(text = "See last order")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = icon),
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier.size(28.dp)
+                )
+                Text(
+                    text = text,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+            }
+            Icon(
+                painter = painterResource(id = R.drawable.chevron),
+                contentDescription = null,
+                tint = Color.Gray,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
+

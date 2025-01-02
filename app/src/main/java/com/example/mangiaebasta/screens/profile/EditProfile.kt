@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -28,12 +29,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mangiaebasta.components.TopBarWithBackArrow
 import com.example.mangiaebasta.viewmodel.MainViewModel
+import androidx.compose.material.*
 
 @Composable
 fun EditProfile(model: MainViewModel, navController: NavController) {
     val user = model.user.collectAsState().value
     val isEditProfile by model.isEditProfile.collectAsState()
-
     // Usa remember per mantenere lo stato locale dei campi
     var firstNameForm by remember { mutableStateOf(user.firstName) }
     var lastNameForm by remember { mutableStateOf(user.lastName) }
@@ -122,12 +123,26 @@ fun EditProfile(model: MainViewModel, navController: NavController) {
                         Log.d("FORM", "New firstname: $firstNameForm, new lastname: $lastNameForm")
                     },
                     // Disabilita il pulsante Save se i campi sono vuoti
-                    enabled = !isEditProfile || (firstNameForm!!.isNotBlank() && lastNameForm!!.isNotBlank())
+                    enabled = !isEditProfile || (firstNameForm!!.isNotBlank() && lastNameForm!!.isNotBlank()),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9800)),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     if (isEditProfile) {
-                        Text("SAVE")
+                        Text(
+                            "SAVE",
+                            color = Color.White,
+                            style = MaterialTheme.typography.button.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
                     } else {
-                        Text("EDIT")
+                        Text(
+                            "EDIT",
+                            color = Color.White,
+                            style = MaterialTheme.typography.button.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
                     }
                 }
             }

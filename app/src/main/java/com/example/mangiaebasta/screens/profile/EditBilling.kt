@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -29,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mangiaebasta.components.TopBarWithBackArrow
 import com.example.mangiaebasta.viewmodel.MainViewModel
+import androidx.compose.material.*
 
 @Composable
 fun EditBilling(model: MainViewModel, navController: NavController) {
@@ -185,23 +189,22 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
                 if (isEditBilling) {
-                    cardFullNameForm?.let {
-                        TextField(
-                            value = it,
-                            onValueChange = { newValue ->
-                                // Accetta solo lettere e al massimo uno spazio
-                                if (newValue.matches(Regex("^[a-zA-Z](\\s[a-zA-Z])?$"))) {
-                                    cardFullNameForm = newValue
-                                    if (newValue.matches(Regex("^[a-zA-Z]+ [a-zA-Z]+$"))) {
-                                        isCardFullNameValid = true
-                                        model.setCardFullNameForm(newValue)
-                                    } else isCardFullNameValid = false
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-                    }
+
+                    TextField(
+                        value = cardFullNameForm ?: "",
+                        onValueChange = { newValue ->
+                            // Accetta stringhe con lettere e un singolo spazio tra le parole
+                            if (newValue.matches(Regex("^[a-zA-Z](\\s[a-zA-Z])*$"))) {
+                                cardFullNameForm = newValue
+                                isCardFullNameValid = newValue.trim().contains(" ") // Valido se contiene almeno uno spazio
+                                model.setCardFullNameForm(newValue)
+                            } else {
+                                isCardFullNameValid = false
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
                     if (!isCardFullNameValid) {
                         Text("Invalid Card Full Name", color = Color.Red)
                     }
@@ -229,12 +232,26 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                             model.updateUserCardData()
                         }
                         model.switchEditBillingMode()
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9800)),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     if (isEditBilling) {
-                        Text("SAVE")
+                        Text(
+                            "SAVE",
+                            color = Color.White,
+                            style = MaterialTheme.typography.button.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
                     } else {
-                        Text("EDIT")
+                        Text(
+                            "EDIT",
+                            color = Color.White,
+                            style = MaterialTheme.typography.button.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
                     }
                 }
             }

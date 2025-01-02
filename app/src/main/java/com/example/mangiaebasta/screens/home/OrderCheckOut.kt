@@ -219,7 +219,7 @@ fun UserStatusDialog(model: MainViewModel, navController: NavHostController) {
         "missingInfo" -> Triple(
             "Missing personal info",
             "You need to complete your personal info before ordering",
-            "profileEdit"
+            "profileScreen"
         )
         "missingBilling" -> Triple(
             "Missing billing info",
