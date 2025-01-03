@@ -2,6 +2,7 @@ package com.example.mangiaebasta.screens.profile
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -43,16 +44,17 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
         topBar = {
             Column {
                 CenterAlignedTopAppBar(
-                    title = { Text("Profile") },
+                    title = { Text(text = "Profile", fontWeight = FontWeight.Bold) },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = Color.White,
                         titleContentColor = Color.Black
                     ),
                 )
                 HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth(), // Larghezza completa
-                    thickness = 2.dp, // Spessore della linea
-                    color = Color(0xFFFFA500) // Colore arancione
+                    modifier = Modifier.fillMaxWidth(),
+                    thickness = 2.dp,
+                    color = Color(0xFFF99501),
+
                 )
             }
         }
@@ -61,6 +63,7 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .background(Color(0xFFf5f5f5))
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -75,7 +78,7 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = null,
-                    modifier = Modifier.size(100.dp)
+                    modifier = Modifier.size(200.dp)
                 )
                 Text(
                     text = "${user.firstName} ${user.lastName}",
@@ -101,15 +104,16 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
                         onClick = { navController.navigate("profileEdit") }
                     )
                     MenuButton(
-                        icon = R.drawable.order,
-                        text = "Last Order",
-                        onClick = { navController.navigate("lastOrder") }
-                    )
-                    MenuButton(
                         icon = R.drawable.card,
                         text = "Payment Info",
                         onClick = { navController.navigate("billingEdit") }
                     )
+                    MenuButton(
+                        icon = R.drawable.order,
+                        text = "Last Order",
+                        onClick = { navController.navigate("lastOrder") }
+                    )
+
                 }
             }
 

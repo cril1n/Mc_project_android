@@ -73,7 +73,7 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
-        TopBarWithBackArrow("Order check out","homeScreen", navController)
+        TopBarWithBackArrow("Order check out","menuDetail", navController)
 
         Column(
             modifier = Modifier
@@ -85,7 +85,7 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
                 painter = painterResource(id = R.drawable.cart),
                 contentDescription = "Shopping Cart",
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(120.dp)
                     .padding(bottom = 24.dp),
                 colorFilter = ColorFilter.tint(orangeColor)
             )
@@ -159,8 +159,12 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = orangeColor),
-                shape = RoundedCornerShape(8.dp)
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color(
+                        0xFFF99501
+                    )
+                ),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Row(
                     horizontalArrangement = Arrangement.Center,

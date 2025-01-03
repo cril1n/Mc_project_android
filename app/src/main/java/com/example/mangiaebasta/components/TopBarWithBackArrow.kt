@@ -14,13 +14,27 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.mangiaebasta.screens.home.bottomBorder
 import com.example.mangiaebasta.viewmodel.MainViewModel
+
+fun Modifier.bottomBorder(color: Color, width: Dp) = this.drawBehind {
+    drawLine(
+        color = color,
+        start = Offset(0f, size.height),  // Inizia dalla parte inferiore della TopAppBar
+        end = Offset(size.width, size.height),  // Finisce su tutta la larghezza
+        strokeWidth = width.toPx()  // Imposta lo spessore del bordo
+    )
+}
 
 
 
@@ -32,6 +46,8 @@ fun TopBarWithBackArrow(
     navController: NavController,
     model: MainViewModel? = null
 ) {
+
+
 
     fun NavController.navigateBackTo(destination: String) {
         // Ottieni la destinazione attuale
@@ -58,15 +74,17 @@ fun TopBarWithBackArrow(
             ) {
                 Text(
                     text = screenName,
-                    color = Color.White,
-                    fontSize = 20.sp,
+                    color = Color.Black,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(end = 65.dp)
                 )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(0xFFF99501) // Requested background color
+            containerColor = Color.White//Color(0xFFF99501) // Requested background color
         ),
         navigationIcon = {
             IconButton(
@@ -79,10 +97,10 @@ fun TopBarWithBackArrow(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.White
+                    tint = Color.Black
                 )
             }
         },
-        modifier = Modifier.shadow(elevation = 4.dp)
+        modifier = Modifier.bottomBorder(Color(0xFFF99501), 4.dp).shadow(elevation = 8.dp),
     )
 }

@@ -2,6 +2,7 @@ package com.example.mangiaebasta
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -14,13 +15,16 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -38,6 +42,8 @@ import com.example.mangiaebasta.screens.profile.LastOrderScreen
 import com.example.mangiaebasta.screens.profile.PrimaRegistrazione
 import com.example.mangiaebasta.screens.profile.ProfileScreen
 import com.example.mangiaebasta.viewmodel.MainViewModel
+import androidx.compose.foundation.layout.*
+
 
 @SuppressLint("RestrictedApi", "StateFlowValueCalledInComposition")
 @Composable
@@ -52,14 +58,29 @@ fun Root(model: MainViewModel) {
         tabScreen = getTabScreenFromLastScreen(lastScreen)
     }
 
+    fun Modifier.topBorder(color: Color, width: Dp) = this.drawBehind {
+        drawLine(
+            color = color,
+            start = androidx.compose.ui.geometry.Offset(0f, 0f),
+            end = androidx.compose.ui.geometry.Offset(size.width, 0f),
+            strokeWidth = width.toPx()
+        )
+    }
+
     if (lastScreen != "" && tabScreen != "") {
         Scaffold(
             bottomBar = {
-                BottomNavigation {
+                BottomNavigation(
+                    modifier = Modifier
+                        .height(70.dp)
+                        .topBorder(Color(0xFFF99501), 4.dp),
+                    backgroundColor = Color.White,
+                ) {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val currentDestination = navBackStackEntry?.destination
 
                     BottomNavigationItem(
+                        modifier = Modifier.padding(top = 5.dp),
                         icon = {
                             Icon(
                                 Icons.Default.Home,
@@ -77,9 +98,11 @@ fun Root(model: MainViewModel) {
                     )
 
                     BottomNavigationItem(
+                        modifier = Modifier.padding(top = 5.dp),
                         icon = {
                             Icon(
-                                Icons.Default.ShoppingCart,
+                                painter = painterResource(id = R.drawable.drone2),
+                                modifier = Modifier.size(21.dp),
                                 contentDescription = "Order Track"
                             )
                         },
@@ -97,6 +120,7 @@ fun Root(model: MainViewModel) {
                     )
 
                     BottomNavigationItem(
+                        modifier = Modifier.padding(top = 5.dp),
                         icon = {
                             Icon(
                                 Icons.Default.Person,

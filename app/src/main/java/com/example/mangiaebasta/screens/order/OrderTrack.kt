@@ -2,8 +2,8 @@ package com.example.mangiaebasta.screens.order
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,8 +15,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -84,11 +86,10 @@ fun OrderTrack(model: MainViewModel, navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(10.dp),
+                .background(Color(0xFFf5f5f5)),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            //Log.d("OrderTrack", "OrderOnDelivery: ${orderOnDelivery.value}")
             Log.d("OrderTrack", "Menu String: ${menuOrdered.value}")
 
             if (orderOnDelivery.value != null && menuOrdered.value != null) {
@@ -97,7 +98,6 @@ fun OrderTrack(model: MainViewModel, navController: NavController) {
                         orderOnDelivery.value!!,
                         model
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
                     OrderMap(orderOnDelivery.value!!, initialRegion.value)
                 } else {
                     NoOrderTrack()
@@ -113,23 +113,28 @@ fun OrderTrack(model: MainViewModel, navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderTrackTopBar() {
-    TopAppBar(
-        title = {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
+    Column {
+        CenterAlignedTopAppBar(
+            title = {
                 androidx.compose.material3.Text(
-                    text = "Order Track",
-                    color = Color.White
+                    text = "Order track",
+                    fontWeight = FontWeight.Bold
                 )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(0xFF390073) // Colore di sfondo
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = Color.White,
+                titleContentColor = Color.Black
+            ),
         )
-    )
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth(), // Larghezza completa
+            thickness = 2.dp, // Spessore della linea
+            color = Color(0xFFF99501), // Colore arancione
+
+        )
+    }
 }
+
 
 @Composable
 fun NoOrderTrack() {
@@ -137,6 +142,7 @@ fun NoOrderTrack() {
         modifier = Modifier
             .statusBarsPadding()
             .fillMaxSize()
+            .background(Color(0xFFf5f5f5))
     ) {
         Column(
             Modifier.fillMaxSize(),

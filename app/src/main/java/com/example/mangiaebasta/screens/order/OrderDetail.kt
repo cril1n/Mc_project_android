@@ -38,27 +38,28 @@ fun OrderDetail(orderData: OrderResponseOnDelivery, model: MainViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(1f / 3f),
+            .fillMaxHeight(1f / 3f)
+            .padding(10.dp),
         elevation = 4.dp,
         backgroundColor = Color.White,
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
-                .padding(24.dp)
+                .padding(18.dp)
                 .fillMaxWidth()
         ) {
             Text(
                 text = "Your order is on delivery",
-                style = MaterialTheme.typography.h5.copy(
+                style = MaterialTheme.typography.h6.copy(
                     color = orangeColor,
                     fontWeight = FontWeight.Bold
                 )
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 // Delivery Time Section
                 Column {
                     Text(

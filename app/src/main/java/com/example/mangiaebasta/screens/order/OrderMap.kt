@@ -40,7 +40,8 @@ fun OrderMap(orderData: OrderResponseOnDelivery, initialRegion: InitialRegion) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight(),
+            .fillMaxHeight()
+            .padding(10.dp, 0.dp, 10.dp, 10.dp),
         elevation = 4.dp,
         shape = RoundedCornerShape(12.dp)
     ) {

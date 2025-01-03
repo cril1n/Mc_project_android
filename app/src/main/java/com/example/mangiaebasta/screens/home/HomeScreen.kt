@@ -3,6 +3,7 @@ package com.example.mangiaebasta.screens.home
 import android.location.Location
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -22,7 +24,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -78,6 +83,15 @@ fun HomeScreen(
     }
 }
 
+fun Modifier.bottomBorder(color: Color, width: Dp) = this.drawBehind {
+    drawLine(
+        color = color,
+        start = Offset(0f, size.height),  // Inizia dalla parte inferiore della TopAppBar
+        end = Offset(size.width, size.height),  // Finisce su tutta la larghezza
+        strokeWidth = width.toPx()  // Imposta lo spessore del bordo
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenHeader(model: MainViewModel) {
@@ -85,7 +99,9 @@ fun HomeScreenHeader(model: MainViewModel) {
 
     TopAppBar(
         title = { },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .bottomBorder(Color(0xFFF99501), 4.dp),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.White
         ),
@@ -101,8 +117,8 @@ fun HomeScreenHeader(model: MainViewModel) {
                         .fillMaxSize()
                         .weight(1f)
                         .background(
-                            color = if (selectedSection.value == 1) Color.Gray else Color.LightGray,
-                            shape = RoundedCornerShape(8.dp)
+                            color = if (selectedSection.value == 1) Color(0xFFf0f0f0) else Color.White,
+                            shape = RoundedCornerShape(16.dp)
                         )
                         .clickable { model.switchScreen() }
                         .padding(vertical = 8.dp),
@@ -111,7 +127,8 @@ fun HomeScreenHeader(model: MainViewModel) {
                     Text(
                         text = "Menu List",
                         fontSize = 16.sp,
-                        color = Color.White
+                        fontWeight = if (selectedSection.value == 1) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                        color = Color.Black
                     )
                 }
 
@@ -123,8 +140,8 @@ fun HomeScreenHeader(model: MainViewModel) {
                         .fillMaxSize()
                         .weight(1f)
                         .background(
-                            color = if (selectedSection.value == 2) Color.Gray else Color.LightGray,
-                            shape = RoundedCornerShape(8.dp)
+                            color = if (selectedSection.value == 2) Color(0xFFf0f0f0) else Color.White,
+                            shape = RoundedCornerShape(16.dp)
                         )
                         .clickable { model.switchScreen() }
                         .padding(vertical = 8.dp),
@@ -133,7 +150,8 @@ fun HomeScreenHeader(model: MainViewModel) {
                     Text(
                         text = "Menu map",
                         fontSize = 16.sp,
-                        color = Color.White
+                        fontWeight = if (selectedSection.value == 2) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                        color = Color.Black
                     )
                 }
             }

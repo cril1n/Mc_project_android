@@ -467,7 +467,7 @@ class MainViewModel(
 
     fun isUserRegistered(): Boolean {
         if (_user.value.firstName?.isNotEmpty() == true || _user.value.lastName?.isNotEmpty() == true) {
-            Log.d("MainViewModel", "GetUserResponse name is not empty")
+            //Log.d("MainViewModel", "GetUserResponse name is not empty")
             return true
         } else {
             Log.d("MainViewModel", "GetUserResponse name is empty")
