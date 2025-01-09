@@ -80,7 +80,7 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                     isCardFullNameValid = isCardFullNameValid,
                     onCardNumberChange = {
                         cardNumberForm = it
-                        isCardNumberValid = it.matches(Regex("^1\\d{15}$"))
+                        isCardNumberValid = it.matches(Regex("^\\d{16}$"))
                         if (isCardNumberValid) model.setCardNumberForm(it)
                     },
                     onExpireMonthChange = {
@@ -155,7 +155,7 @@ fun BillingForm(
             isValid = isCardNumberValid,
             keyboardType = KeyboardType.Number,
             onValueChange = onCardNumberChange,
-            errorMessage = "Invalid card number (must be 16 digits starting with 1)",
+            errorMessage = "Invalid card number (must be 16 digits)",
             leadingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.card),

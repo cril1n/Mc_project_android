@@ -62,9 +62,8 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .background(Color(0xFFf5f5f5))
-                .padding(horizontal = 16.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 90.dp, bottom = 0.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {

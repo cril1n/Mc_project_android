@@ -422,6 +422,11 @@ class MainViewModel(
             _userStatus.value = "onDelivery"
             return
         }
+        Log.d("MainViewModel", "Card first number: ${_user.value.cardNumber.toString()[0]}")
+        if(_user.value.cardNumber.toString()[0] != '1'){
+            _userStatus.value = "invalidCard"
+            return
+        }
 
         try {
             var orderResponse: OrderResponseOnDelivery?

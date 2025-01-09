@@ -50,10 +50,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 @Composable
-fun OrderCheckOut(menuString: String, navController: NavHostController, model: MainViewModel) {
+fun OrderCheckOut(navController: NavHostController, model: MainViewModel) {
 
-
-    var menu by remember { mutableStateOf<MenuDetailed?>(null) }
+    val menu = model.menuDetailed.collectAsState().value
     val address by model.address.collectAsState()
 
     // Definisci i colori personalizzati
@@ -62,7 +61,6 @@ fun OrderCheckOut(menuString: String, navController: NavHostController, model: M
     val labelTextColor = Color(0xFF666666)
 
     LaunchedEffect(Unit) {
-        menu = Json.decodeFromString<MenuDetailed>(menuString)
         model.loadAdress()
     }
 
@@ -236,6 +234,11 @@ fun UserStatusDialog(model: MainViewModel, navController: NavHostController) {
             "Order already on delivery",
             "You already have an order on delivery, you can check the status in the order section",
             "orderTrack"
+        )
+        "invalidCard" -> Triple(
+            "Invalid card",
+            "Invalid card data",
+            "billingEdit"
         )
         else -> null
     }

@@ -133,8 +133,7 @@ fun MenuDetail(navController: NavController, model: MainViewModel) {
                             // Order Now Button
                             Button(
                                 onClick = {
-                                    val jsonString = Json.encodeToString(menuDetailed)
-                                    navController.navigate("orderCheckOut/${jsonString}")
+                                    navController.navigate("orderCheckOut")
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()

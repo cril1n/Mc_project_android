@@ -146,16 +146,8 @@ fun Root(model: MainViewModel) {
                     route = "home_stack"
                 ) {
                     composable("homeScreen") { HomeScreen(model, navController) }
-                    composable("menuDetail",) { MenuDetail( navController, model) }
-                    composable(
-                        "orderCheckOut/{menuString}",
-                        arguments = listOf(
-                            navArgument("menuString") { type = NavType.StringType }
-                        ),
-                    ) { backStackEntry ->
-                        val menuString = backStackEntry.arguments?.getString("menuString")
-                        OrderCheckOut(menuString!!, navController, model)
-                    }
+                    composable("menuDetail") { MenuDetail(navController, model) }
+                    composable("orderCheckOut",) { OrderCheckOut(navController, model) }
                 }
 
                 navigation(startDestination = "orderTrack", route = "order_stack") {
@@ -165,7 +157,7 @@ fun Root(model: MainViewModel) {
                 }
 
                 navigation(
-                    startDestination =  if (tabScreen == "profile_stack") lastScreen else "profileScreen",
+                    startDestination = if (tabScreen == "profile_stack") lastScreen else "profileScreen",
                     route = "profile_stack"
                 ) {
                     composable("firstRegistration") { PrimaRegistrazione(model, navController) }
@@ -185,7 +177,7 @@ fun Root(model: MainViewModel) {
 
 fun getTabScreenFromLastScreen(screen: String): String {
     return when (screen) {
-        "homeScreen", "menuDetail", "orderCheckOut/{menuString}" -> "home_stack"
+        "homeScreen", "menuDetail", "orderCheckOut" -> "home_stack"
         "orderTrack" -> "order_stack"
         "firstRegistration", "profileScreen", "profileEdit", "billingEdit", "lastOrder" -> "profile_stack"
         else -> "home_stack"
