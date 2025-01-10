@@ -4,8 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import android.graphics.Bitmap
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.serialization.SerialName
 
 
 
@@ -133,6 +131,13 @@ data class MenuImage(
     @PrimaryKey val mid: Int,
     val base64: String,
     val version: Int
+)
+
+data class Quadruple<A, B, C, D>(
+    val first: A,
+    val second: B,
+    val third: C,
+    val fourth: D
 )
 
 

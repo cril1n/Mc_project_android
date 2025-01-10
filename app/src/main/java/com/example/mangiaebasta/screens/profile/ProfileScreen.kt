@@ -1,17 +1,18 @@
 package com.example.mangiaebasta.screens.profile
 
-import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.mangiaebasta.R
+import com.example.mangiaebasta.components.CustomAlertDialog
 import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +42,8 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
         }
     }
 
+    DeleteAccountDialog(model)
+
     Scaffold(
         topBar = {
             Column {
@@ -55,7 +59,7 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
                     thickness = 2.dp,
                     color = Color(0xFFF99501),
 
-                )
+                    )
             }
         }
     ) { padding ->
@@ -88,7 +92,9 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
 
             // Menu Items Card
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color(0xFFF99501), RoundedCornerShape(16.dp)),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -119,20 +125,26 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
             Spacer(modifier = Modifier.weight(1f))
 
             // Delete Account Button
-            TextButton(
+            Button(
                 onClick = {
-                    model.resetApp()
+                    model.setDeleteAccountDialog(true)
                 },
+                modifier = Modifier
+                    .width(200.dp)
+                    .padding(8.dp)
+                    .height(50.dp),
                 colors = ButtonDefaults.textButtonColors(
-                    contentColor = Color.Red
+                    containerColor = Color(0xFFB14D4D),
+                    contentColor = Color.White
                 ),
-                border = ButtonDefaults.outlinedButtonBorder(),
-
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, Color.LightGray),
             ) {
                 Text(
                     "DELETE ACCOUNT",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.5.sp // Spaziatura tra le lettere
                 )
             }
 
@@ -181,5 +193,23 @@ private fun MenuButton(
                 modifier = Modifier.size(20.dp)
             )
         }
+    }
+}
+
+@Composable
+fun DeleteAccountDialog(model: MainViewModel, ) {
+    val showDialog by model.deleteAccountDialog.collectAsState()
+
+    if (showDialog) {
+        CustomAlertDialog(
+            model::setDeleteAccountDialog,
+            model::resetApp,
+            null,
+            null,
+            "Account delete",
+            "Are you sure you want to delete your account?",
+            "Yes, I want",
+            "No, I don't"
+        )
     }
 }

@@ -94,6 +94,7 @@ class MainViewModel(
     }
 
     suspend fun saveLastScreen() {
+        Log.d("MainViewModel", "Saving last screen: ${_lastScreen.value}")
         dataStoreManager.setLastScreenInDataStore(_lastScreen.value)
     }
 
@@ -102,6 +103,7 @@ class MainViewModel(
     }
 
     suspend fun saveLastSelectedMid() {
+        Log.d("MainViewModel", "Saving last selected mid: ${_selectedMid.value}")
         dataStoreManager.saveLastSelectedMid(_selectedMid.value)
     }
 
@@ -456,16 +458,16 @@ class MainViewModel(
         }
     }
 
-    private var _showDialog = MutableStateFlow(false)
-    var showDialog: MutableStateFlow<Boolean> = _showDialog
+    private var _orderShowDialog = MutableStateFlow(false)
+    var orderShowDialog: MutableStateFlow<Boolean> = _orderShowDialog
 
-    fun setShowDialog() {
-        if (_userStatus.value != "") _showDialog.value = true
-        else _showDialog.value = false
+    fun changeOrderShowDialog() {
+        if (_userStatus.value != "") _orderShowDialog.value = true
+        else _orderShowDialog.value = false
     }
 
-    fun setShowDialog(value: Boolean) {
-        _showDialog.value = value
+    fun setOrderShowDialog(value: Boolean) {
+        _orderShowDialog.value = value
     }
 
     //PROFILE
@@ -632,6 +634,13 @@ class MainViewModel(
 
 
     //RESET
+
+    private val _deleteAccountDialog = MutableStateFlow(false)
+    val deleteAccountDialog: StateFlow<Boolean> = _deleteAccountDialog
+
+    fun setDeleteAccountDialog(value: Boolean) {
+        _deleteAccountDialog.value = value
+    }
 
     private val _reset = MutableStateFlow(false)
     val reset: StateFlow<Boolean> = _reset

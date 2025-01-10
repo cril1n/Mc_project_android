@@ -14,23 +14,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,13 +36,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.mangiaebasta.R
+import com.example.mangiaebasta.components.CustomAlertDialog
 import com.example.mangiaebasta.components.TopBarWithBackArrow
-import com.example.mangiaebasta.model.MenuDetailed
+import com.example.mangiaebasta.model.Quadruple
 import com.example.mangiaebasta.viewmodel.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 
 @Composable
 fun OrderCheckOut(navController: NavHostController, model: MainViewModel) {
@@ -151,7 +146,7 @@ fun OrderCheckOut(navController: NavHostController, model: MainViewModel) {
                 onClick = {
                     CoroutineScope(Dispatchers.Main).launch {
                         menu?.mid?.let { model.sendOrder(it, navController) }
-                        model.setShowDialog()
+                        model.changeOrderShowDialog()
                     }
                 },
                 modifier = Modifier
@@ -216,65 +211,48 @@ private fun DetailRow(label: String, value: String) {
 fun UserStatusDialog(model: MainViewModel, navController: NavHostController) {
     Log.d("UserStatusDialog", "nav graph ${navController.visibleEntries}")
     val userStatus by model.userStatus.collectAsState()
-    val showDialog by model.showDialog.collectAsState()
+    val showDialog by model.orderShowDialog.collectAsState()
 
     // Struttura per mappare lo stato dell'utente ai dati del dialogo e alla rotta
     val dialogData = when (userStatus) {
-        "missingInfo" -> Triple(
+        "missingInfo" -> Quadruple(
             "Missing personal info",
             "You need to complete your personal info before ordering",
-            "profileScreen"
+            "profileScreen",
+            "Complete profile"
         )
-        "missingBilling" -> Triple(
+        "missingBilling" -> Quadruple(
             "Missing billing info",
             "You need to complete your billing info before ordering",
-            "billingEdit"
+            "billingEdit",
+            "Complete billing"
         )
-        "onDelivery" -> Triple(
+        "onDelivery" -> Quadruple(
             "Order already on delivery",
             "You already have an order on delivery, you can check the status in the order section",
-            "orderTrack"
+            "orderTrack",
+            "Check order status"
         )
-        "invalidCard" -> Triple(
+        "invalidCard" -> Quadruple(
             "Invalid card",
             "Invalid card data",
-            "billingEdit"
+            "billingEdit",
+            "Check billing data"
         )
         else -> null
     }
 
-    dialogData?.let { (title, message, route) ->
+    dialogData?.let { (title, message, route, confirm) ->
         if (showDialog) {
-            AlertDialog(
-                onDismissRequest = {
-                    model.setShowDialog(false)
-                },
-                title = {
-                    Text(text = title)
-                },
-                text = {
-                    Text(text = message)
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            model.setShowDialog(false)
-                            navController.navigate(route)
-                        }
-                    ) {
-                        Text("Confirm")
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            model.setShowDialog(false)
-                        }
-                    ) {
-                        Text("Close")
-                    }
-                }
-            )
+            CustomAlertDialog(
+                model::setOrderShowDialog,
+                null,
+                navController,
+                route,
+                title,
+                message,
+                confirm,
+                "Close")
         }
     }
 }

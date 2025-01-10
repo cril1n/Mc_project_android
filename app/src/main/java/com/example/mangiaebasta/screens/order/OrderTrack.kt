@@ -156,7 +156,7 @@ fun NoOrderTrack() {
                     .size(200.dp)
                     .padding(bottom = 16.dp)
             )
-            Text("Nessuna ordine in corso")
+            Text("No order on delivery")
         }
     }
 }

@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mangiaebasta.R
 import com.example.mangiaebasta.viewmodel.MainViewModel
-import com.mapbox.maps.extension.style.expressions.dsl.generated.color
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
