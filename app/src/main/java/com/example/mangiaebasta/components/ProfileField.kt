@@ -1,6 +1,7 @@
 package com.example.mangiaebasta.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.mangiaebasta.viewmodel.MainViewModel
 
 
 @Composable
@@ -25,7 +27,8 @@ fun ProfileField(
     label: String,
     value: String,
     isEditing: Boolean,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    model: MainViewModel
 ) {
     Column {
 
@@ -72,6 +75,11 @@ fun ProfileField(
                         .clip(MaterialTheme.shapes.small)
                         .background(Color(0xFFf5f5f5))
                         .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .clickable(
+                            onClick = {
+                                model.switchEditMode()
+                            }
+                        )
                 )
             }
         }

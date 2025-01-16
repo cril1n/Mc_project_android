@@ -1,6 +1,7 @@
 package com.example.mangiaebasta.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.mangiaebasta.viewmodel.MainViewModel
 
 @Composable
 fun BillingField(
@@ -33,7 +35,8 @@ fun BillingField(
     onValueChange: (String) -> Unit,
     errorMessage: String,
     modifier: Modifier = Modifier,
-    leadingIcon: @Composable (() -> Unit)? = null
+    leadingIcon: @Composable (() -> Unit)? = null,
+    model: MainViewModel
 ) {
     Column(modifier = modifier.padding(vertical = 8.dp)) {
         if (isEditing) {
@@ -83,8 +86,11 @@ fun BillingField(
                         .fillMaxWidth()
                         .clip(MaterialTheme.shapes.small)
                         .background(Color(0xFFf5f5f5))
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .clickable {
+                            model.switchEditBillingMode()
+                        },
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     leadingIcon?.invoke()
                     Spacer(modifier = Modifier.width(8.dp))

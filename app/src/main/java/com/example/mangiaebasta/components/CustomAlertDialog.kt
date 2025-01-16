@@ -54,7 +54,7 @@ fun CustomAlertDialog(
                     .fillMaxWidth()
                     .border(2.dp, Color(0xFFF99501), RoundedCornerShape(28.dp)),
                 shape = RoundedCornerShape(28.dp),
-                color = MaterialTheme.colorScheme.surface,
+                color = Color.White,
                 tonalElevation = 6.dp
             ) {
                 Column(

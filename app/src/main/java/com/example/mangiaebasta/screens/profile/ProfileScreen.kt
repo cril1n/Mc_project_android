@@ -81,12 +81,12 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
                 Image(
                     painter = painterResource(id = R.drawable.logo),
                     contentDescription = null,
-                    modifier = Modifier.size(200.dp)
+                    modifier = Modifier.size(230.dp)
                 )
                 Text(
                     text = "${user.firstName} ${user.lastName}",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
@@ -94,6 +94,7 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(top = 20.dp)
                     .border(1.dp, Color(0xFFF99501), RoundedCornerShape(16.dp)),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -139,6 +140,7 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
                 ),
                 shape = RoundedCornerShape(16.dp),
                 border = BorderStroke(1.dp, Color.LightGray),
+                elevation = ButtonDefaults.buttonElevation(2.dp)
             ) {
                 Text(
                     "DELETE ACCOUNT",
@@ -178,11 +180,12 @@ private fun MenuButton(
                     painter = painterResource(id = icon),
                     contentDescription = null,
                     tint = Color.Black,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(32.dp)
                 )
                 Text(
                     text = text,
-                    fontSize = 16.sp,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.W400,
                     color = Color.Black
                 )
             }
@@ -208,7 +211,7 @@ fun DeleteAccountDialog(model: MainViewModel, ) {
             null,
             "Account delete",
             "Are you sure you want to delete your account?",
-            "Yes, I want",
+            "Yes, I do",
             "No, I don't"
         )
     }

@@ -81,7 +81,8 @@ fun EditProfile(model: MainViewModel, navController: NavController) {
                                 lastNameForm = it
                                 model.setLastNameForm(it)
                             }
-                        }
+                        },
+                        model = model
                     )
                 }
             }
@@ -117,14 +118,16 @@ fun ProfileForm(
     firstNameForm: String,
     lastNameForm: String,
     onFirstNameChange: (String) -> Unit,
-    onLastNameChange: (String) -> Unit
+    onLastNameChange: (String) -> Unit,
+    model: MainViewModel
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         ProfileField(
             label = "FIRST NAME",
             value = firstNameForm,
             isEditing = isEditProfile,
-            onValueChange = onFirstNameChange
+            onValueChange = onFirstNameChange,
+            model = model
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -133,7 +136,8 @@ fun ProfileForm(
             label = "LAST NAME",
             value = lastNameForm,
             isEditing = isEditProfile,
-            onValueChange = onLastNameChange
+            onValueChange = onLastNameChange,
+            model = model
         )
     }
 }

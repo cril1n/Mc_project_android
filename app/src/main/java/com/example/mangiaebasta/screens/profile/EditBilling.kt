@@ -102,7 +102,8 @@ fun EditBilling(model: MainViewModel, navController: NavController) {
                         cardFullNameForm = it
                         isCardFullNameValid = it.matches(Regex("^[a-zA-Z]+(\\s[a-zA-Z]+)+$"))
                         if (isCardFullNameValid) model.setCardFullNameForm(it)
-                    }
+                    },
+                    model = model
                 )
             }
         }
@@ -146,7 +147,8 @@ fun BillingForm(
     onExpireMonthChange: (String) -> Unit,
     onExpireYearChange: (String) -> Unit,
     onCVVChange: (String) -> Unit,
-    onCardFullNameChange: (String) -> Unit
+    onCardFullNameChange: (String) -> Unit,
+    model: MainViewModel
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         BillingField(label = "CARD NUMBER",
@@ -162,7 +164,9 @@ fun BillingForm(
                     modifier = Modifier.size(21.dp),
                     contentDescription = null
                 )
-            })
+            },
+            model = model
+        )
 
         Row(modifier = Modifier.fillMaxWidth()) {
             BillingField(label = "EXPIRE MONTH",
@@ -173,7 +177,8 @@ fun BillingForm(
                 onValueChange = onExpireMonthChange,
                 errorMessage = "Invalid month",
                 modifier = Modifier.weight(1f),
-                leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) })
+                leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null)},
+                model = model)
             Spacer(modifier = Modifier.width(16.dp))
             BillingField(label = "EXPIRE YEAR",
                 value = expireYearForm,
@@ -183,7 +188,8 @@ fun BillingForm(
                 onValueChange = onExpireYearChange,
                 errorMessage = "Invalid year",
                 modifier = Modifier.weight(1f),
-                leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) })
+                leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
+                model = model)
         }
 
         BillingField(label = "CVV",
@@ -193,7 +199,8 @@ fun BillingForm(
             keyboardType = KeyboardType.Number,
             onValueChange = onCVVChange,
             errorMessage = "Invalid CVV",
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) })
+            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+            model = model)
 
         BillingField(label = "CARDHOLDER NAME",
             value = cardFullNameForm,
@@ -202,7 +209,8 @@ fun BillingForm(
             keyboardType = KeyboardType.Text,
             onValueChange = onCardFullNameChange,
             errorMessage = "Invalid name (First and Last name required)",
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) })
+            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+            model = model)
     }
 }
 

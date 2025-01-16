@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -49,7 +50,7 @@ fun PrimaRegistrazione(model: MainViewModel, navController: NavHostController) {
             Text(
                 text = "First Registration",
                 textAlign = TextAlign.Center,
-                fontSize = 24.sp,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(8.dp)
             )
@@ -57,7 +58,7 @@ fun PrimaRegistrazione(model: MainViewModel, navController: NavHostController) {
             Text(
                 text = "Fill the following fields to get started",
                 textAlign = TextAlign.Center,
-                fontSize = 16.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Normal,
                 color = Color.Gray,
                 modifier = Modifier.padding(
@@ -127,11 +128,12 @@ fun PrimaRegistrazione(model: MainViewModel, navController: NavHostController) {
                     model.updateUserNameData()
                     navController.navigate("profileScreen")
                 },
-                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth().height(50.dp),
                 enabled = isSubmitEnabled,
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFF99501))
             ) {
-                Text(text = "Submit", color = Color.White)
+                Text(text = "Submit", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
     }
