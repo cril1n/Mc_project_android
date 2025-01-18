@@ -15,6 +15,6 @@ fun LocationPermissionDeniedScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Location permission denied")
+        Text(text = "Location permission denied. Please change the settings to enable location or reinstall the app.")
     }
 }

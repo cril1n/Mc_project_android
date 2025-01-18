@@ -131,6 +131,7 @@ class MainViewModel(
             uid = dataStoreManager.getUidFromDataStore()
             if (sid == null || sid == "null") {
                 Log.d(TAG, "First run")
+                dataStoreManager.setLastScreenInDataStore("homeScreen")
                 _firstRun.value = true
                 _initialized.value = true
                 true
@@ -644,12 +645,14 @@ class MainViewModel(
 
     private val _reset = MutableStateFlow(false)
     val reset: StateFlow<Boolean> = _reset
+
     fun resetApp() {
         CoroutineScope(Dispatchers.Main).launch {
             dataStoreManager.clearDataStore()
             CommunicationManager.resetSidUid()
             sid = null
             uid = null
+            _lastScreen.value = "homeScreen"
             _initialized.value = false
             _firstRun.value = true
             _locationPermissionGranted.value = false

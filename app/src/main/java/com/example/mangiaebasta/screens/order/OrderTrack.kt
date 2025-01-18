@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.mangiaebasta.R
@@ -156,7 +157,11 @@ fun NoOrderTrack() {
                     .size(200.dp)
                     .padding(bottom = 16.dp)
             )
-            Text("No order on delivery")
+            Text(
+                text = "No order on delivery",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

@@ -37,6 +37,9 @@ fun ProfileScreen(model: MainViewModel, navController: NavController) {
         if (currentRoute != null) {
             model.setLastScreen(currentRoute)
         }
+    }
+
+    LaunchedEffect (Unit) {
         if (!model.isUserRegistered()) {
             navController.navigate("firstRegistration")
         }

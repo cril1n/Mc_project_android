@@ -55,6 +55,7 @@ fun Root(model: MainViewModel) {
 
 
     LaunchedEffect(Unit) {
+        Log.d("Root", "LaunchedEffect called, lastScreen: $lastScreen")
         tabScreen = getTabScreenFromLastScreen(lastScreen)
     }
 
