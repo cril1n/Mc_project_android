@@ -76,12 +76,12 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>) {
         }
     }
 
-    val LASTMENU_KEY = intPreferencesKey("lastMenu_key")
+    val LASTMENUMID_KEY = intPreferencesKey("lastMenuMid_key")
 
     suspend fun saveLastSelectedMid(lastMenuMid: Int) {
         dataStore.edit { preferences ->
-            preferences[LASTMENU_KEY] = lastMenuMid
-            val savedLastMenu = preferences[LASTMENU_KEY]
+            preferences[LASTMENUMID_KEY] = lastMenuMid
+            val savedLastMenu = preferences[LASTMENUMID_KEY]
             Log.d("DataStoreManager", "New saved Menu: $savedLastMenu")
         }
     }
@@ -91,12 +91,63 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>) {
         try {
             return withContext(Dispatchers.IO) {
                 val preferences = dataStore.data.first()
-                preferences[LASTMENU_KEY]!!
+                preferences[LASTMENUMID_KEY]!!
             }
         } catch (e: Exception) {
             Log.d("DataStoreManager", "Error getting last menu from data store: $e")
         }
         return -1
+    }
+
+    val LASTORDER_KEY = stringPreferencesKey("lastOrder_key")
+
+    suspend fun saveLastOrder(lastOrder: String ) {
+        dataStore.edit { preferences ->
+            preferences[LASTORDER_KEY] = lastOrder
+            val savedLastOrder = preferences[LASTORDER_KEY]
+            Log.d("DataStoreManager", "New saved LastOrder: $savedLastOrder")
+        }
+    }
+
+    suspend fun getLastOrder(): String? {
+        return withContext(Dispatchers.IO) {
+            val preferences = dataStore.data.first()
+            preferences[LASTORDER_KEY]
+        }
+    }
+
+    val LASTMENU_KEY = stringPreferencesKey("lastMenu_key")
+
+    suspend fun saveLastMenu(lastMenu: String ) {
+        dataStore.edit { preferences ->
+            preferences[LASTMENU_KEY] = lastMenu
+            val savedLastMenu = preferences[LASTMENU_KEY]
+            Log.d("DataStoreManager", "New saved LastMenu: $savedLastMenu")
+        }
+    }
+
+    suspend fun getLastMenu(): String? {
+        return withContext(Dispatchers.IO) {
+            val preferences = dataStore.data.first()
+            preferences[LASTMENU_KEY]
+        }
+    }
+
+    val IMAGELASTMENU_KEY = stringPreferencesKey("imageLastMenu_key")
+
+    suspend fun saveLastImageMenu(lastImageMenu: String ) {
+        dataStore.edit { preferences ->
+            preferences[IMAGELASTMENU_KEY] = lastImageMenu
+            val savedLastImageMenu = preferences[IMAGELASTMENU_KEY]
+            Log.d("DataStoreManager", "New saved LastImageMenu: $savedLastImageMenu")
+        }
+    }
+
+    suspend fun getLastImageMenu(): String? {
+        return withContext(Dispatchers.IO) {
+            val preferences = dataStore.data.first()
+            preferences[IMAGELASTMENU_KEY]
+        }
     }
 
     suspend fun saveMenuOrdered(mid: Int) {
@@ -189,5 +240,6 @@ class DatastoreManager(private val dataStore: DataStore<Preferences>) {
             Log.d("StorageManager", "Data store cleared")
         }
     }
+
 
 }

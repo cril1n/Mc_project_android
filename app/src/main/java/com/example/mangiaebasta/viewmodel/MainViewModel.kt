@@ -22,6 +22,7 @@ import com.example.mangiaebasta.model.InitialRegion
 import com.example.mangiaebasta.model.LocationData
 import com.example.mangiaebasta.model.MenuDetailed
 import com.example.mangiaebasta.model.MenuWImage
+import com.example.mangiaebasta.model.OrderResponse
 import com.example.mangiaebasta.model.OrderResponseCompleted
 import com.example.mangiaebasta.model.OrderResponseOnDelivery
 import com.example.mangiaebasta.repositories.ImageRepo
@@ -30,8 +31,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.ByteArrayOutputStream
 import kotlin.math.abs
 
 
@@ -453,10 +456,30 @@ class MainViewModel(
                 setMenuOrdered()
                 Log.d("MainViewModel", "Order sent")
                 navController.navigate("orderTrack")
+                try{
+                    dataStoreManager.saveLastOrder(Json.encodeToString(orderResponse))
+                    dataStoreManager.saveLastMenu( Json.encodeToString(menuDetailed.value))
+                    dataStoreManager.saveLastImageMenu(Json.encodeToString(bitmapToBase64(imageMenuDetailed.value)))
+                }catch(e : Exception){
+                    Log.e("MainViewModel", "Error in sendOrder: $e")
+                }
+
             }
         } catch (e: Exception) {
             Log.e("MainViewModel", "Error in sendOrder: $e")
         }
+    }
+
+    fun bitmapToBase64(bitmap: Bitmap?): String {
+        val outputStream = ByteArrayOutputStream()
+        bitmap?.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        val byteArray = outputStream.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
+
+    fun base64ToBitmap(base64String: String): Bitmap? {
+        val decodedBytes = Base64.decode(base64String, Base64.DEFAULT)
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
     }
 
     private var _orderShowDialog = MutableStateFlow(false)
@@ -633,7 +656,62 @@ class MainViewModel(
         }
     }
 
+    //LASTORDER
 
+    private val _lastOrder = MutableStateFlow<OrderResponseOnDelivery?>(null)
+    val lastOrder: StateFlow<OrderResponseOnDelivery?> = _lastOrder
+
+    private val _lastMenuOrdered = MutableStateFlow<MenuDetailed?>(null)
+    val lastMenuOrdered: StateFlow<MenuDetailed?> = _lastMenuOrdered
+
+    private val _imageLastMenu = MutableStateFlow<Bitmap?>(null)
+    val imageLastMenu: StateFlow<Bitmap?> = _imageLastMenu
+
+    suspend fun setImageLastMenu() {
+        val base64 = lastMenuOrdered.value?.mid?.let { imageRepo.getImageWithMid(it) }
+        if(base64 != null) {
+            val byteArray = Base64.decode(base64, Base64.DEFAULT)
+            if(byteArray != null) _imageLastMenu.value = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        }
+    }
+
+    fun setLastOrder() {
+        CoroutineScope(Dispatchers.Main).launch {
+            // Ottieni il JSON salvato
+            val savedOrderJson = dataStoreManager.getLastOrder()
+
+            // Verifica che non sia nullo o vuoto
+            if (!savedOrderJson.isNullOrEmpty()) {
+                try {
+                    Log.d("SetLastOrder", "Deserializing JSON: $savedOrderJson")
+                    // Deserializza il JSON in un oggetto OrderResponse
+                    val order: OrderResponseOnDelivery = Json.decodeFromString(savedOrderJson)
+
+                    // Aggiorna lo stato nel Main thread
+                    _lastOrder.value = order
+
+                } catch (e: Exception) {
+                    // Gestisci eventuali errori di deserializzazione
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    fun setLastMenu() {
+        CoroutineScope(Dispatchers.Main).launch {
+            val savedMenuJson = dataStoreManager.getLastMenu()
+            if (!savedMenuJson.isNullOrEmpty()) {
+                try {
+                    val menu: MenuDetailed = Json.decodeFromString(savedMenuJson)
+                    _lastMenuOrdered.value = menu
+                    setImageLastMenu()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
     //RESET
 
     private val _deleteAccountDialog = MutableStateFlow(false)
@@ -657,6 +735,9 @@ class MainViewModel(
             _firstRun.value = true
             _locationPermissionGranted.value = false
             _reset.value = !_reset.value
+            _imageLastMenu.value = null
+            _lastOrder.value = null
+            _lastMenuOrdered.value = null
         }
     }
 
